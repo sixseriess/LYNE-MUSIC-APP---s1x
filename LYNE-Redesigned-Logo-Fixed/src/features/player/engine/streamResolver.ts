@@ -31,6 +31,7 @@ import {
 } from "./playbackStream";
 import { findYoutubeStandIn } from "./youtubeStandIn";
 import { findExactSongVersion } from "./exactSongVersion";
+import { usePlayerStore } from "../store/playerStore";
 
 export interface ResolveStreamOptions {
   progressive?: boolean;
