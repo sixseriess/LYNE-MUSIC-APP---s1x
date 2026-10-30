@@ -21,6 +21,8 @@ export interface ResolvedAudioStream {
 
 const PREFERRED_ITAGS = [251, 140, 250, 249, 139];
 
+export type StreamAudioQuality = "low" | "standard" | "high";
+
 function toAudioFormat(raw: unknown): AudioFormat | null {
   const format = asRecord(raw);
   if (!format) return null;
@@ -64,15 +66,45 @@ export function extractAudioFormats(playerResponse: unknown): AudioFormat[] {
 export function selectBestAudioFormat(
   formats: AudioFormat[],
   preferredCodec?: "opus" | "aac",
+  quality: StreamAudioQuality = "high",
 ): AudioFormat | null {
   if (formats.length === 0) return null;
+
+  const codecFormats = preferredCodec
+    ? formats.filter((format) =>
+        preferredCodec === "opus"
+          ? format.mimeType.includes("opus") || format.mimeType.includes("webm")
+          : format.mimeType.includes("mp4") || format.mimeType.includes("aac"),
+      )
+    : formats;
+  const candidates = codecFormats.length > 0 ? codecFormats : formats;
+  const withBitrate = candidates.filter(
+    (format) => Number.isFinite(format.bitrate) && format.bitrate > 0,
+  );
+
+  if (withBitrate.length > 0 && quality === "low") {
+    return [...withBitrate].sort((a, b) => a.bitrate - b.bitrate)[0] ?? null;
+  }
+  if (withBitrate.length > 0 && quality === "standard") {
+    return (
+      [...withBitrate].sort(
+        (a, b) =>
+          Math.abs(a.bitrate - 128_000) - Math.abs(b.bitrate - 128_000) ||
+          b.bitrate - a.bitrate,
+      )[0] ?? null
+    );
+  }
+  if (withBitrate.length > 0 && quality === "high") {
+    return [...withBitrate].sort((a, b) => b.bitrate - a.bitrate)[0] ?? null;
+  }
+
   const order =
     preferredCodec === "aac" ? [140, 139, 251, 250, 249] : PREFERRED_ITAGS;
   for (const itag of order) {
-    const match = formats.find((format) => format.itag === itag);
+    const match = candidates.find((format) => format.itag === itag);
     if (match) return match;
   }
-  return [...formats].sort((a, b) => b.bitrate - a.bitrate)[0] ?? null;
+  return [...candidates].sort((a, b) => b.bitrate - a.bitrate)[0] ?? null;
 }
 
 function expiryFromUrl(url: string): string | null {
