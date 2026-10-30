@@ -91,7 +91,7 @@ const installerSidebarSvg = [
   '<text x="82" y="198" text-anchor="middle" fill="#b5b6bd" font-family="Arial,sans-serif" font-size="8" letter-spacing="2">MUSIC PLAYER</text>',
   '<text x="82" y="281" text-anchor="middle" fill="#777981" font-family="Arial,sans-serif" font-size="8" letter-spacing="1.2">LISTEN YOUR WAY</text>',
   '</svg>'
-].join("\\n");
+].join("\n");
 
 const installerHeaderSvg = [
   '<svg width="150" height="57" viewBox="0 0 150 57" xmlns="http://www.w3.org/2000/svg">',
@@ -99,7 +99,7 @@ const installerHeaderSvg = [
   '<text x="75" y="37" text-anchor="middle" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="800" letter-spacing="1">LYNE</text>',
   '<rect x="61" y="44" width="28" height="2" rx="1" fill="#c8f56a"/>',
   '</svg>'
-].join("\\n");
+].join("\n");
 
 const iconSizes = [16, 32, 48, 64, 128, 256, 512];
 await mkdir(path.join(root, "build/icons"), { recursive: true });
