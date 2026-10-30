@@ -58,7 +58,7 @@
       "native/snap-preview/build/Release/snap_preview.node"
     ],
     "linux": {
-      "executableName": "liner",
+      "executableName": "lyne",
       "syncDesktopName": true,
       "maintainer": "hkamori <dev@tryliner.fun>",
       "icon": "build/icons",
@@ -69,11 +69,11 @@
       "category": "Audio"
     },
     "deb": {
-      "packageName": "liner",
-      "artifactName": "liner_${version}_${arch}.${ext}"
+      "packageName": "lyne",
+      "artifactName": "LYNE-${version}-${arch}.${ext}"
     },
     "appImage": {
-      "artifactName": "Liner-${version}.${ext}"
+      "artifactName": "LYNE-${version}.${ext}"
     },
     "win": {
       "executableName": "lyne",
