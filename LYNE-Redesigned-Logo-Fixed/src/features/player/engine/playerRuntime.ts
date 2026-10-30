@@ -103,6 +103,17 @@ export class PlayerRuntime {
           this.audio.volume = state.volume;
         }
       }
+
+      if (state.outputDeviceId !== prevState.outputDeviceId) {
+        void this.setAudioOutputDevice(state.outputDeviceId || "default").catch(
+          (error) => {
+            log("yellow", "audio", `audio output change failed: ${String(error)}`);
+            if (usePlayerStore.getState().outputDeviceId === state.outputDeviceId) {
+              usePlayerStore.getState().setOutputDeviceId("default");
+            }
+          },
+        );
+      }
       if (
         state.playbackRate !== prevState.playbackRate ||
         state.isPitchLinked !== prevState.isPitchLinked ||
