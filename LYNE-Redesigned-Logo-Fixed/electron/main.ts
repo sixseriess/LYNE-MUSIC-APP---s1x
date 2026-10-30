@@ -502,12 +502,12 @@ function createWindow() {
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   console.warn(
-    "\n\x1b[33m[Liner]\x1b[0m Another instance of LYNE is already running in the background. Exiting development instance.\nTo run in development mode, please close the running LYNE application first.\n",
+    "\n\x1b[33m[LYNE]\x1b[0m Another instance of LYNE is already running in the background. Exiting development instance.\nTo run in development mode, please close the running LYNE application first.\n",
   );
   app.quit();
 } else {
   app.on("second-instance", (_event, argv) => {
-    // running instance gets here when xdg-open / os launches liner:// again
+    // running instance gets here when xdg-open / os launches lyne:// again
     const raw = findDeeplinkArg(argv);
     if (shutdown.isQuitting()) {
       // this process is on its way out and can no longer show a window; the new
