@@ -10,6 +10,10 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
   const [mounted, setMounted] = useState(false);
   const volume = usePlayerStore((state) => state.volume);
   const setVolume = usePlayerStore((state) => state.setVolume);
+  const audioQuality = usePlayerStore((state) => state.audioQuality);
+  const setAudioQuality = usePlayerStore((state) => state.setAudioQuality);
+  const playbackRate = usePlayerStore((state) => state.playbackRate);
+  const setPlaybackRate = usePlayerStore((state) => state.setPlaybackRate);
   const autoplaySimilar = usePlayerStore((state) => state.autoplaySimilar);
   const setAutoplaySimilar = usePlayerStore((state) => state.setAutoplaySimilar);
   const trackDoubleClickBehavior = usePlayerStore((state) => state.trackDoubleClickBehavior);
@@ -30,7 +34,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
         description="Set the overall playback volume"
         searchQuery={searchQuery}
         control={
-          <div className="w-[150px]">
+          <div className="w-[180px]">
             <Slider
               value={Math.round(volume * 100)}
               onChange={(value) => setVolume(value / 100)}
@@ -40,6 +44,44 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
               formatValue={(value) => `${value}%`}
             />
           </div>
+        }
+      />
+      <SettingRow
+        title="Playback speed"
+        description="Adjust the speed of the current and future tracks"
+        searchQuery={searchQuery}
+        control={
+          <div className="w-[180px]">
+            <Slider
+              value={Math.round(playbackRate * 100)}
+              onChange={(value) => setPlaybackRate(value / 100)}
+              min={50}
+              max={200}
+              step={5}
+              ariaLabel="Playback speed"
+              formatValue={(value) => `${(value / 100).toFixed(2)}×`}
+            />
+          </div>
+        }
+      />
+      <SettingRow
+        title="Audio quality"
+        description="Choose the preferred streaming quality"
+        searchQuery={searchQuery}
+        control={
+          mounted ? (
+            <SegmentedControl
+              ariaLabel="Audio quality"
+              value={audioQuality}
+              onChange={setAudioQuality}
+              options={[
+                { value: "low", label: "Low" },
+                { value: "standard", label: "Normal" },
+                { value: "high", label: "High" },
+                { value: "lossless", label: "Lossless" },
+              ]}
+            />
+          ) : <span />
         }
       />
       <SettingRow
