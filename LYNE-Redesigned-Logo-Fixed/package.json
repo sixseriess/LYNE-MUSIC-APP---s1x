@@ -23,11 +23,12 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "electron:build": "tsc -b && vite build && electron-builder",
-    "electron:build:linux": "tsc -b && vite build && electron-builder --linux",
-    "electron:build:win": "pnpm native:build && tsc -b && vite build && electron-builder --win --publish never",
-    "electron:build:mac": "tsc -b && vite build && electron-builder --mac",
-    "native:build": "node scripts/build-native-addon.cjs"
+    "electron:build": "pnpm generate:brand-assets && tsc -b && vite build && electron-builder",
+    "electron:build:linux": "pnpm generate:brand-assets && tsc -b && vite build && electron-builder --linux",
+    "electron:build:win": "pnpm generate:brand-assets && pnpm native:build && tsc -b && vite build && electron-builder --win --publish never",
+    "electron:build:mac": "pnpm generate:brand-assets && tsc -b && vite build && electron-builder --mac",
+    "native:build": "node scripts/build-native-addon.cjs",
+    "generate:brand-assets": "node scripts/generate-brand-assets.mjs"
   },
   "build": {
     "appId": "com.lyne.music",
@@ -162,6 +163,7 @@
     "vite": "^8.3.5",
     "vite-plugin-electron": "^1.1.2",
     "vite-plugin-electron-renderer": "^1.0.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
