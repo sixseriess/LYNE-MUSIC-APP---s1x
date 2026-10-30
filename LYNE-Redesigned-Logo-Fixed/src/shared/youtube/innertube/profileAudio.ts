@@ -14,11 +14,13 @@ import {
   toResolvedStream,
   type AudioFormat,
   type ResolvedAudioStream,
+  type StreamAudioQuality,
 } from "./innertubeAudioFormats";
 
 export interface ProfileAudioOptions {
   signal?: AbortSignal;
   preferredCodec?: "opus" | "aac";
+  audioQuality?: StreamAudioQuality;
 }
 
 function playerBody(
@@ -70,7 +72,7 @@ export async function resolveWithProfile(
   const formats = extractAudioFormats(response).filter(
     (format) => player || format.url,
   );
-  const best = selectBestAudioFormat(formats, options.preferredCodec);
+  const best = selectBestAudioFormat(formats, options.preferredCodec, options.audioQuality);
   if (!best)
     throw new InnertubeError(
       `${profile.clientName} returned no direct audio formats.`,
