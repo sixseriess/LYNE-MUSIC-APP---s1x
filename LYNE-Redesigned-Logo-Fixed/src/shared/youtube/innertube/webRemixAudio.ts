@@ -74,7 +74,7 @@ async function mintContentPoToken(videoId: string): Promise<string> {
       ? undefined
       : window.linerElectron?.mintPoToken;
   if (!mint)
-    throw new InnertubeError("PO tokens need a newer Liner app version.", 501);
+    throw new InnertubeError("PO tokens need a newer LYNE app version.", 501);
   return mint(videoId);
 }
 
