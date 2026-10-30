@@ -247,7 +247,7 @@ const MIN_WINDOW_HEIGHT = 705;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "Liner",
+    title: "LYNE",
     icon: path.join(process.env.VITE_PUBLIC!, "icon.png"),
     width: DEFAULT_WINDOW_WIDTH,
     height: DEFAULT_WINDOW_HEIGHT,
@@ -482,7 +482,7 @@ function createWindow() {
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   console.warn(
-    "\n\x1b[33m[Liner]\x1b[0m Another instance of Liner is already running in the background. Exiting development instance.\nTo run in development mode, please close the running Liner application first.\n",
+    "\n\x1b[33m[Liner]\x1b[0m Another instance of LYNE is already running in the background. Exiting development instance.\nTo run in development mode, please close the running LYNE application first.\n",
   );
   app.quit();
 } else {
