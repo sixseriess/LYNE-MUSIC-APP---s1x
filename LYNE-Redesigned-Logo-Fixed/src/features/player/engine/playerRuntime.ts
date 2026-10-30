@@ -84,6 +84,13 @@ export class PlayerRuntime {
     const initialVolume = usePlayerStore.getState().volume;
     this.audio.volume = initialVolume;
     this.applyPlaybackRateAndPitch();
+    const savedOutputDevice = usePlayerStore.getState().outputDeviceId;
+    if (savedOutputDevice && savedOutputDevice !== "default") {
+      void this.setAudioOutputDevice(savedOutputDevice).catch((error) => {
+        log("yellow", "audio", `saved output device is unavailable: ${String(error)}`);
+        usePlayerStore.getState().setOutputDeviceId("default");
+      });
+    }
     log("cyan", "boot", `volume ${initialVolume}`);
 
     usePlayerStore.subscribe((state, prevState) => {
@@ -474,6 +481,23 @@ export class PlayerRuntime {
       !this.audio.error &&
       !isExpired
     );
+  }
+
+  public supportsAudioOutputSelection(): boolean {
+    const audio = this.audio as HTMLAudioElement & {
+      setSinkId?: (deviceId: string) => Promise<void>;
+    };
+    return typeof audio.setSinkId === "function";
+  }
+
+  public async setAudioOutputDevice(deviceId: string): Promise<void> {
+    const audio = this.audio as HTMLAudioElement & {
+      setSinkId?: (deviceId: string) => Promise<void>;
+    };
+    if (typeof audio.setSinkId !== "function") {
+      throw new Error("Audio output selection is not supported by this runtime.");
+    }
+    await audio.setSinkId(deviceId || "default");
   }
 
   public applyPlaybackRateAndPitch(
