@@ -43,14 +43,30 @@ export function AppearanceTab({ searchQuery }: { searchQuery?: string }) {
   const chooseBackground = (file?: File) => {
     if (!file || !file.type.startsWith("image/")) return;
     const reader = new FileReader();
+    reader.onerror = () => window.alert("Couldn't read that image. Try another file.");
     reader.onload = () => {
       if (typeof reader.result !== "string") return;
-      try {
-        localStorage.setItem(BACKGROUND_KEY, reader.result);
-        setBackground(reader.result);
-      } catch {
-        window.alert("That image is too large to save. Try a smaller image.");
-      }
+      const source = new Image();
+      source.onerror = () => window.alert("That image couldn't be opened.");
+      source.onload = () => {
+        // Resize phone photos before saving so they fit within browser storage limits.
+        const maxEdge = 2400;
+        const scale = Math.min(1, maxEdge / Math.max(source.width, source.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(source.width * scale));
+        canvas.height = Math.max(1, Math.round(source.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.drawImage(source, 0, 0, canvas.width, canvas.height);
+        const optimized = canvas.toDataURL("image/jpeg", 0.86);
+        try {
+          localStorage.setItem(BACKGROUND_KEY, optimized);
+          setBackground(optimized);
+        } catch {
+          window.alert("Couldn't save that image. Try a smaller image.");
+        }
+      };
+      source.src = reader.result;
     };
     reader.readAsDataURL(file);
   };
