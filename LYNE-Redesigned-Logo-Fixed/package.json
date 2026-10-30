@@ -1,6 +1,6 @@
 {
   "name": "@lyne/client",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "type": "module",
   "private": true,
   "description": "LYNE Music Player",
@@ -37,8 +37,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "tryliner",
-        "repo": "desktop"
+        "owner": "sixseriess",
+        "repo": "LYNE-MUSIC-APP---s1x"
       }
     ],
     "directories": {
