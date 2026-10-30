@@ -64,7 +64,8 @@ const SETTING_ITEMS: { tabId: TabId; titleKey: string; descKey?: string }[] = [
   // Playback
   { tabId: "Playback", titleKey: "Master volume", descKey: "Set the overall playback volume" },
   { tabId: "Playback", titleKey: "Playback speed", descKey: "Adjust the speed of the current and future tracks" },
-  { tabId: "Playback", titleKey: "Audio quality", descKey: "Choose the preferred streaming quality" },
+  { tabId: "Playback", titleKey: "Audio quality", descKey: "Set the target bitrate for newly played YouTube tracks" },
+  { tabId: "Playback", titleKey: "Output device", descKey: "Choose which audio device LYNE sends playback to" },
   {
     tabId: "Playback",
     titleKey: "settings.autoplay_similar.title",
