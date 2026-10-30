@@ -217,7 +217,7 @@ const shutdown = createShutdown({
   watchdogMs: 4000,
 });
 
-// liner:// deeplink support (share links bounce here from link.tryliner.fun)
+// lyne:// deeplink support (share links bounce here from link.tryliner.fun)
 
 // cold-start url arrives before the window exists, stash it until renderer is ready
 let pendingDeeplink: DeeplinkTarget | null = findDeeplinkArg(process.argv)
@@ -543,7 +543,7 @@ if (!gotTheLock) {
       );
     }
 
-    // register liner:// so browsers / xdg-open route share links to us
+    // register lyne:// so browsers / xdg-open route share links to us
     // (on linux the packaged .desktop carries the mime handler too)
     if (process.defaultApp && process.argv.length >= 2) {
       app.setAsDefaultProtocolClient(DEEP_LINK_SCHEME, process.execPath, [
