@@ -23,18 +23,20 @@ export function AppearanceTab({ searchQuery }: { searchQuery?: string }) {
   }, []);
 
   useEffect(() => {
-    const root = document.getElementById("root");
+    const root = document.querySelector<HTMLElement>(".app-shell-enter");
     if (!root) return;
     if (background) {
       root.style.backgroundImage = `linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), url("${background}")`;
       root.style.backgroundSize = "cover";
       root.style.backgroundPosition = "center";
       root.style.backgroundAttachment = "fixed";
+      root.style.backgroundRepeat = "no-repeat";
     } else {
       root.style.backgroundImage = "";
       root.style.backgroundSize = "";
       root.style.backgroundPosition = "";
       root.style.backgroundAttachment = "";
+      root.style.backgroundRepeat = "";
     }
   }, [background]);
 
@@ -55,6 +57,14 @@ export function AppearanceTab({ searchQuery }: { searchQuery?: string }) {
 
   const resetBackground = () => {
     try { localStorage.removeItem(BACKGROUND_KEY); } catch {}
+    const shell = document.querySelector<HTMLElement>(".app-shell-enter");
+    if (shell) {
+      shell.style.backgroundImage = "";
+      shell.style.backgroundSize = "";
+      shell.style.backgroundPosition = "";
+      shell.style.backgroundAttachment = "";
+      shell.style.backgroundRepeat = "";
+    }
     setBackground("");
     if (fileInput.current) fileInput.current.value = "";
   };
@@ -125,6 +135,11 @@ export function AppearanceTab({ searchQuery }: { searchQuery?: string }) {
           className="hidden"
           onChange={(event) => chooseBackground(event.target.files?.[0])}
         />
+        {background ? (
+          <div className="mb-[2px] h-[112px] w-full overflow-hidden rounded-[10px] border border-black/10 dark:border-white/10" aria-label="Custom background preview">
+            <img src={background} alt="Selected background preview" className="h-full w-full object-cover" />
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-[10px]">
           <button
             type="button"
