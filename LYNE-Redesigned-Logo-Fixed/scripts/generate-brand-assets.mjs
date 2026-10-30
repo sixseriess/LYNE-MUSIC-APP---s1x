@@ -86,10 +86,18 @@ const installerSidebarSvg = [
   '<svg width="164" height="314" viewBox="0 0 164 314" xmlns="http://www.w3.org/2000/svg">',
   '<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18191d"/><stop offset="1" stop-color="#0c0d10"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#c8f56a" stop-opacity=".12"/><stop offset="1" stop-color="#c8f56a" stop-opacity="0"/></radialGradient></defs>',
   '<rect width="164" height="314" fill="url(#bg)"/><ellipse cx="82" cy="112" rx="92" ry="92" fill="url(#glow)"/>',
-  '<path transform="translate(44 82) scale(1.7)" d="M4 0C1.79086 0 0 1.79086 0 4V27.2081C0 30.2751 3.30951 32.201 5.97608 30.6859L13.9629 26.1478C16.6295 24.6327 19.939 26.5586 19.939 29.6256V31C19.939 33.2091 21.7298 35 23.939 35H41C43.2091 35 45 33.2091 45 31V27.5586C45 25.3494 43.2091 23.5586 41 23.5586H35.2783C33.0691 23.5586 31.2783 21.7677 31.2783 19.5586V10.0519C31.2783 6.98497 27.9688 5.05899 25.3022 6.57411L17.3153 11.1121C14.6488 12.6273 11.3393 10.7013 11.3393 7.63433V4C11.3393 1.79086 9.54843 0 7.33929 0H4Z" fill="#fff"/>',
-  '<text x="82" y="205" text-anchor="middle" fill="#f4f4f5" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="4">LYNE</text>',
-  '<text x="82" y="226" text-anchor="middle" fill="#9b9ca3" font-family="Arial,sans-serif" font-size="8" letter-spacing="2.4">MUSIC PLAYER</text>',
-  '<rect x="56" y="260" width="52" height="2" rx="1" fill="#c8f56a"/><text x="82" y="282" text-anchor="middle" fill="#777981" font-family="Arial,sans-serif" font-size="8" letter-spacing="1.2">LISTEN YOUR WAY</text>',
+  '<text x="82" y="151" text-anchor="middle" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="37" font-weight="800" letter-spacing="0">LYNE</text>',
+  '<rect x="56" y="169" width="52" height="3" rx="1.5" fill="#c8f56a"/>',
+  '<text x="82" y="198" text-anchor="middle" fill="#b5b6bd" font-family="Arial,sans-serif" font-size="8" letter-spacing="2">MUSIC PLAYER</text>',
+  '<text x="82" y="281" text-anchor="middle" fill="#777981" font-family="Arial,sans-serif" font-size="8" letter-spacing="1.2">LISTEN YOUR WAY</text>',
+  '</svg>'
+].join("\n");
+
+const installerHeaderSvg = [
+  '<svg width="150" height="57" viewBox="0 0 150 57" xmlns="http://www.w3.org/2000/svg">',
+  '<rect width="150" height="57" fill="#101114"/>',
+  '<text x="75" y="37" text-anchor="middle" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="800" letter-spacing="1">LYNE</text>',
+  '<rect x="61" y="44" width="28" height="2" rx="1" fill="#c8f56a"/>',
   '</svg>'
 ].join("\n");
 
@@ -149,5 +157,9 @@ await writeFile(
   path.join(root, "build/installer-sidebar.bmp"),
   pngToBmp24(renderPng(installerSidebarSvg, 164)),
 );
+await writeFile(
+  path.join(root, "build/installer-header.bmp"),
+  pngToBmp24(renderPng(installerHeaderSvg, 150)),
+);
 
-console.log("Generated LYNE symbol icons and branded Windows installer artwork.");
+console.log("Generated LYNE wordmark icons and Windows installer artwork.");

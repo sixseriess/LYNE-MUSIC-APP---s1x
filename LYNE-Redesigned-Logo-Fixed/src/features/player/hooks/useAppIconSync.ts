@@ -14,7 +14,7 @@ const FULL_BLEED: IconLayout = {
   canvas: 512,
   inset: 0,
   radius: 112,
-  logo: { x: 112, y: 144, width: 288, height: 224 },
+  logo: { x: 0, y: 0, width: 512, height: 512 },
   shadow: false,
 };
 
@@ -22,7 +22,7 @@ const MAC_DOCK: IconLayout = {
   canvas: 1024,
   inset: 100,
   radius: 185,
-  logo: { x: 280.25, y: 331.75, width: 463.5, height: 360.5 },
+  logo: { x: 100, y: 100, width: 824, height: 824 },
   shadow: true,
 };
 
@@ -69,11 +69,25 @@ async function renderIconDataUrl(
   ctx.stroke();
 
   const img = await loadLogo();
-  if (isLight) {
-    ctx.filter = "invert(1)";
-  }
   const { x, y, width, height } = layout.logo;
+  ctx.save();
+  if (isLight) ctx.filter = "invert(1)";
   ctx.drawImage(img, x, y, width, height);
+  ctx.restore();
+
+  // Keep the LYNE accent line visible in both system themes.
+  ctx.fillStyle = "#c8f56a";
+  const accentWidth = size * 0.242;
+  const accentHeight = Math.max(3, size * 0.014);
+  ctx.beginPath();
+  ctx.roundRect(
+    layout.inset + (size - accentWidth) / 2,
+    layout.inset + size * 0.642,
+    accentWidth,
+    accentHeight,
+    accentHeight / 2,
+  );
+  ctx.fill();
   return canvas.toDataURL("image/png");
 }
 

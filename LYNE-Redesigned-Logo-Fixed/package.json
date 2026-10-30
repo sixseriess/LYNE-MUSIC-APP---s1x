@@ -1,6 +1,6 @@
 {
   "name": "@lyne/client",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "type": "module",
   "private": true,
   "description": "LYNE Music Player",
@@ -91,7 +91,8 @@
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
       "installerSidebar": "build/installer-sidebar.bmp",
-      "uninstallerSidebar": "build/installer-sidebar.bmp"
+      "uninstallerSidebar": "build/installer-sidebar.bmp",
+      "installerHeader": "build/installer-header.bmp"
     },
     "mac": {
       "icon": "build/icon-mac.png",
