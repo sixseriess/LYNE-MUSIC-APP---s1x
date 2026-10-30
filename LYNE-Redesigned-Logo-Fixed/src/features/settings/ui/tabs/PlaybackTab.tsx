@@ -107,7 +107,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
       />
       <SettingRow
         title="Audio quality"
-        description="Choose the target bitrate for YouTube streams. Lossless playback is not offered by the source."
+        description="Set the target bitrate for newly played YouTube tracks."
         searchQuery={searchQuery}
         control={
           mounted ? (
