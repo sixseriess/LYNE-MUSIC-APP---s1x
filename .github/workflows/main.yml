@@ -55,6 +55,10 @@ jobs:
         working-directory: ${{ steps.project.outputs.working-directory }}
         run: pnpm run electron:build:win
 
+      - name: Verify stream-quality and LYNE deeplink tests
+        working-directory: ${{ steps.project.outputs.working-directory }}
+        run: pnpm exec vitest run src/shared/youtube/innertube/innertubeAudioFormats.test.ts electron/deeplink.test.ts
+
       - name: Read LYNE version
         id: app-version
         shell: pwsh
