@@ -27,6 +27,7 @@ const WAITING_GRACE_MS = 300; // a buffering hiccup shorter than this never show
 
 export class PlayerRuntime {
   private audio: HTMLAudioElement;
+  private activeOutputDeviceId = "default";
   private currentTrackId: string | null = null;
   private loadEpoch = 0;
   private loadAbortController: AbortController | null = null;
@@ -508,7 +509,10 @@ export class PlayerRuntime {
     if (typeof audio.setSinkId !== "function") {
       throw new Error("Audio output selection is not supported by this runtime.");
     }
-    await audio.setSinkId(deviceId || "default");
+    const targetDeviceId = deviceId || "default";
+    if (this.activeOutputDeviceId === targetDeviceId) return;
+    await audio.setSinkId(targetDeviceId);
+    this.activeOutputDeviceId = targetDeviceId;
   }
 
   public applyPlaybackRateAndPitch(
