@@ -36,12 +36,6 @@ export function AppearanceTab({ searchQuery }: { searchQuery?: string }) {
       root.style.backgroundPosition = "";
       root.style.backgroundAttachment = "";
     }
-    return () => {
-      root.style.backgroundImage = "";
-      root.style.backgroundSize = "";
-      root.style.backgroundPosition = "";
-      root.style.backgroundAttachment = "";
-    };
   }, [background]);
 
   const chooseBackground = (file?: File) => {
