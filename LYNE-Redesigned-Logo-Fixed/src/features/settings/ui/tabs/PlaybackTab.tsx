@@ -112,7 +112,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
       />
       <SettingRow
         title="Audio quality"
-        description="Choose the stream quality for new tracks. Lossless uses a true lossless source when one is available; otherwise LYNE picks the highest available quality."
+        description="Prefer lossless audio when the source provides it. YouTube streams are lossy, so LYNE uses their highest available quality."
         searchQuery={searchQuery}
         control={
           mounted ? (
