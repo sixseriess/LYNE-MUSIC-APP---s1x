@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { findDeeplinkArg, parseDeeplink } from "./deeplink";
 
 describe("parseDeeplink", () => {
+  it("accepts legacy Liner links without registering that scheme for LYNE", () => {
+    expect(parseDeeplink("liner://track?id=RGdkabupfPI")).toEqual({
+      type: "track",
+      id: "RGdkabupfPI",
+    });
+  });
+
   it("accepts real share targets", () => {
     expect(parseDeeplink("lyne://artist?id=UCGtGpOIGHfRu1KYL9pi-mNQ")).toEqual(
       {
