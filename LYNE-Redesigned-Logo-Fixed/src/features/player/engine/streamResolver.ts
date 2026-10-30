@@ -135,8 +135,8 @@ async function resolveYoutubeTrack(
       `album row ${rowVideoId} is a ${track.audioVariant}, playing the song ${songId}`,
     );
   const videoId = songId ?? rowVideoId;
-  // The app-hosted stream has a fixed encode; Low and Standard bypass it so
-  // the selected bitrate is honored by YouTube's format resolver.
+  // The app-hosted stream has a fixed lossy encode. Low, Standard and
+  // Lossless bypass it so direct source formats can be selected accurately.
   if (usePlayerStore.getState().audioQuality === "high") {
     const liner = await resolveLinerStream(videoId, signal);
     if (liner) {
