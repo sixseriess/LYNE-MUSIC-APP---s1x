@@ -27,6 +27,7 @@ const WAITING_GRACE_MS = 300; // a buffering hiccup shorter than this never show
 
 export class PlayerRuntime {
   private audio: HTMLAudioElement;
+  private activeOutputDeviceId = "default";
   private currentTrackId: string | null = null;
   private loadEpoch = 0;
   private loadAbortController: AbortController | null = null;
@@ -84,6 +85,13 @@ export class PlayerRuntime {
     const initialVolume = usePlayerStore.getState().volume;
     this.audio.volume = initialVolume;
     this.applyPlaybackRateAndPitch();
+    const savedOutputDevice = usePlayerStore.getState().outputDeviceId;
+    if (savedOutputDevice && savedOutputDevice !== "default") {
+      void this.setAudioOutputDevice(savedOutputDevice).catch((error) => {
+        log("yellow", "audio", `saved output device is unavailable: ${String(error)}`);
+        usePlayerStore.getState().setOutputDeviceId("default");
+      });
+    }
     log("cyan", "boot", `volume ${initialVolume}`);
 
     usePlayerStore.subscribe((state, prevState) => {
@@ -95,6 +103,17 @@ export class PlayerRuntime {
         if (!this.audio.paused) {
           this.audio.volume = state.volume;
         }
+      }
+
+      if (state.outputDeviceId !== prevState.outputDeviceId) {
+        void this.setAudioOutputDevice(state.outputDeviceId || "default").catch(
+          (error) => {
+            log("yellow", "audio", `audio output change failed: ${String(error)}`);
+            if (usePlayerStore.getState().outputDeviceId === state.outputDeviceId) {
+              usePlayerStore.getState().setOutputDeviceId("default");
+            }
+          },
+        );
       }
       if (
         state.playbackRate !== prevState.playbackRate ||
@@ -245,7 +264,7 @@ export class PlayerRuntime {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
         artist: track.artists,
-        album: (track as { albumTitle?: string }).albumTitle || "Liner",
+        album: (track as { albumTitle?: string }).albumTitle || "LYNE",
         artwork: track.coverUrl
           ? [
               { src: track.coverUrl, sizes: "96x96", type: "image/jpeg" },
@@ -474,6 +493,26 @@ export class PlayerRuntime {
       !this.audio.error &&
       !isExpired
     );
+  }
+
+  public supportsAudioOutputSelection(): boolean {
+    const audio = this.audio as HTMLAudioElement & {
+      setSinkId?: (deviceId: string) => Promise<void>;
+    };
+    return typeof audio.setSinkId === "function";
+  }
+
+  public async setAudioOutputDevice(deviceId: string): Promise<void> {
+    const audio = this.audio as HTMLAudioElement & {
+      setSinkId?: (deviceId: string) => Promise<void>;
+    };
+    if (typeof audio.setSinkId !== "function") {
+      throw new Error("Audio output selection is not supported by this runtime.");
+    }
+    const targetDeviceId = deviceId || "default";
+    if (this.activeOutputDeviceId === targetDeviceId) return;
+    await audio.setSinkId(targetDeviceId);
+    this.activeOutputDeviceId = targetDeviceId;
   }
 
   public applyPlaybackRateAndPitch(

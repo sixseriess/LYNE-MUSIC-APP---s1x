@@ -31,6 +31,7 @@ import {
 } from "./playbackStream";
 import { findYoutubeStandIn } from "./youtubeStandIn";
 import { findExactSongVersion } from "./exactSongVersion";
+import { usePlayerStore } from "../store/playerStore";
 
 export interface ResolveStreamOptions {
   progressive?: boolean;
@@ -60,7 +61,8 @@ async function resolveYoutubeAudio(
   progressive: boolean,
   signal?: AbortSignal,
 ): Promise<PlaybackStream> {
-  if (isYoutubeSignedIn() && prefersAccountPlayback()) {
+  const audioQuality = usePlayerStore.getState().audioQuality;
+  if (audioQuality === "high" && isYoutubeSignedIn() && prefersAccountPlayback()) {
     try {
       const stream = await resolveTvAudio(videoId, progressive, signal);
       log("cyan", "playback", `resolved youtube tv audio for ${videoId}`);
@@ -71,7 +73,7 @@ async function resolveYoutubeAudio(
     }
   }
   return fromInnertubeStream(
-    await resolveDirectAudioStream(videoId, { signal }),
+    await resolveDirectAudioStream(videoId, { signal, audioQuality }),
   );
 }
 
@@ -133,10 +135,14 @@ async function resolveYoutubeTrack(
       `album row ${rowVideoId} is a ${track.audioVariant}, playing the song ${songId}`,
     );
   const videoId = songId ?? rowVideoId;
-  const liner = await resolveLinerStream(videoId, signal);
-  if (liner) {
-    log("cyan", "playback", `resolved liner audio (r2) for "${track.title}"`);
-    return fromLinerStream(liner, track);
+  // The app-hosted stream has a fixed encode; Low and Standard bypass it so
+  // the selected bitrate is honored by YouTube's format resolver.
+  if (usePlayerStore.getState().audioQuality === "high") {
+    const liner = await resolveLinerStream(videoId, signal);
+    if (liner) {
+      log("cyan", "playback", `resolved hosted audio for "${track.title}"`);
+      return fromLinerStream(liner, track);
+    }
   }
   return resolveYoutubeAudio(videoId, progressive, signal);
 }

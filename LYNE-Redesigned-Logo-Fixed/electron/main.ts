@@ -217,7 +217,7 @@ const shutdown = createShutdown({
   watchdogMs: 4000,
 });
 
-// liner:// deeplink support (share links bounce here from link.tryliner.fun)
+// lyne:// deeplink support (share links bounce here from link.tryliner.fun)
 
 // cold-start url arrives before the window exists, stash it until renderer is ready
 let pendingDeeplink: DeeplinkTarget | null = findDeeplinkArg(process.argv)
@@ -432,16 +432,36 @@ function createWindow() {
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    bundleManager = new BundleManager({
-      defaultRendererDist: RENDERER_DIST,
-    });
-    bundleManager.setMainWindow(mainWindow);
+    // LYNE must never consume Liner's OTA bundle feed. OTA is opt-in and only
+    // enabled when an explicitly configured LYNE endpoint and key are present.
+    const otaEnabled =
+      process.env.LYNE_ENABLE_OTA_UPDATES === "true" &&
+      Boolean(process.env.LYNE_UPDATER_URL) &&
+      Boolean(process.env.LYNE_UPDATER_PUBLIC_KEY);
+
+    bundleManager = otaEnabled
+      ? new BundleManager({
+          defaultRendererDist: RENDERER_DIST,
+          updaterUrl: process.env.LYNE_UPDATER_URL,
+          publicKeyHex: process.env.LYNE_UPDATER_PUBLIC_KEY,
+        })
+      : null;
+
+    if (bundleManager) bundleManager.setMainWindow(mainWindow);
+    else
+      console.info(
+        "[LYNE] Remote bundle updates are disabled; loading the bundled app.",
+      );
+
     const manager = bundleManager;
     const win = mainWindow;
     void (async () => {
-      if (app.isPackaged)
+      if (app.isPackaged && manager)
         await manager.updateBeforeLaunch().catch(() => undefined);
-      if (!win.isDestroyed()) win.loadFile(manager.getEffectiveIndexPath());
+      const indexPath =
+        manager?.getEffectiveIndexPath() ??
+        path.join(RENDERER_DIST, "index.html");
+      if (!win.isDestroyed()) win.loadFile(indexPath);
     })();
   }
 
@@ -482,12 +502,12 @@ function createWindow() {
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   console.warn(
-    "\n\x1b[33m[Liner]\x1b[0m Another instance of LYNE is already running in the background. Exiting development instance.\nTo run in development mode, please close the running LYNE application first.\n",
+    "\n\x1b[33m[LYNE]\x1b[0m Another instance of LYNE is already running in the background. Exiting development instance.\nTo run in development mode, please close the running LYNE application first.\n",
   );
   app.quit();
 } else {
   app.on("second-instance", (_event, argv) => {
-    // running instance gets here when xdg-open / os launches liner:// again
+    // running instance gets here when xdg-open / os launches lyne:// again
     const raw = findDeeplinkArg(argv);
     if (shutdown.isQuitting()) {
       // this process is on its way out and can no longer show a window; the new
@@ -523,7 +543,7 @@ if (!gotTheLock) {
       );
     }
 
-    // register liner:// so browsers / xdg-open route share links to us
+    // register lyne:// so browsers / xdg-open route share links to us
     // (on linux the packaged .desktop carries the mime handler too)
     if (process.defaultApp && process.argv.length >= 2) {
       app.setAsDefaultProtocolClient(DEEP_LINK_SCHEME, process.execPath, [

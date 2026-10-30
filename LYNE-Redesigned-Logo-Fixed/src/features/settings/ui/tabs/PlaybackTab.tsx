@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ChangeEvent } from "react";
 import { useTranslation } from "@/languages";
-import { usePlayerStore } from "@/features/player";
+import { playerRuntime, usePlayerStore } from "@/features/player";
 import { ToggleSwitch } from "@/shared/ui";
 import { Slider } from "@/shared/ui/Slider";
 import { SettingRow, SettingSection, SegmentedControl } from "../controls";
@@ -8,6 +8,9 @@ import { SettingRow, SettingSection, SegmentedControl } from "../controls";
 export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
+  const [audioOutputs, setAudioOutputs] = useState<Array<{ deviceId: string; label: string }>>([{ deviceId: "default", label: "System default" }]);
+  const [outputSupported, setOutputSupported] = useState(false);
+  const [outputError, setOutputError] = useState("");
   const volume = usePlayerStore((state) => state.volume);
   const setVolume = usePlayerStore((state) => state.setVolume);
   const audioQuality = usePlayerStore((state) => state.audioQuality);
@@ -20,12 +23,55 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
   const setTrackDoubleClickBehavior = usePlayerStore((state) => state.setTrackDoubleClickBehavior);
   const defaultPlaybackContext = usePlayerStore((state) => state.defaultPlaybackContext);
   const setDefaultPlaybackContext = usePlayerStore((state) => state.setDefaultPlaybackContext);
+  const outputDeviceId = usePlayerStore((state) => state.outputDeviceId);
+  const setOutputDeviceId = usePlayerStore((state) => state.setOutputDeviceId);
   const pauseOnDeviceChange = usePlayerStore((state) => state.pauseOnDeviceChange);
   const setPauseOnDeviceChange = usePlayerStore((state) => state.setPauseOnDeviceChange);
 
   useEffect(() => {
     setMounted(true);
+    let active = true;
+    const mediaDevices = navigator.mediaDevices;
+    const refreshOutputs = async () => {
+      setOutputSupported(Boolean(playerRuntime?.supportsAudioOutputSelection()));
+      if (!mediaDevices?.enumerateDevices) return;
+      try {
+        const devices = await mediaDevices.enumerateDevices();
+        if (!active) return;
+        const unique = new Map<string, string>();
+        unique.set("default", "System default");
+        for (const device of devices) {
+          if (device.kind !== "audiooutput" || !device.deviceId || device.deviceId === "default") continue;
+          unique.set(device.deviceId, device.label || "Audio output");
+        }
+        setAudioOutputs(Array.from(unique, ([deviceId, label]) => ({ deviceId, label })));
+      } catch {
+        if (active) setAudioOutputs([{ deviceId: "default", label: "System default" }]);
+      }
+    };
+    void refreshOutputs();
+    mediaDevices?.addEventListener?.("devicechange", refreshOutputs);
+    return () => {
+      active = false;
+      mediaDevices?.removeEventListener?.("devicechange", refreshOutputs);
+    };
   }, []);
+
+  const handleOutputChange = async (event: ChangeEvent<HTMLSelectElement>) => {
+    const deviceId = event.currentTarget.value;
+    setOutputError("");
+    const runtime = playerRuntime;
+    if (!runtime) {
+      setOutputError("Audio playback is not initialized yet.");
+      return;
+    }
+    try {
+      await runtime.setAudioOutputDevice(deviceId);
+      setOutputDeviceId(deviceId);
+    } catch (error) {
+      setOutputError(error instanceof Error ? error.message : "Couldn't change audio output.");
+    }
+  };
 
   return (
     <SettingSection>
@@ -66,7 +112,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
       />
       <SettingRow
         title="Audio quality"
-        description="Choose the preferred streaming quality"
+        description="Set the target bitrate for newly played YouTube tracks."
         searchQuery={searchQuery}
         control={
           mounted ? (
@@ -78,10 +124,38 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
                 { value: "low", label: "Low" },
                 { value: "standard", label: "Normal" },
                 { value: "high", label: "High" },
-                { value: "lossless", label: "Lossless" },
               ]}
             />
           ) : <span />
+        }
+      />
+      <SettingRow
+        title="Output device"
+        description="Choose which audio device LYNE sends playback to."
+        searchQuery={searchQuery}
+        control={
+          outputSupported ? (
+            <div className="flex w-[210px] flex-col gap-[5px]">
+              <select
+                aria-label="Audio output device"
+                value={outputDeviceId}
+                onChange={handleOutputChange}
+                className="h-[36px] w-full rounded-[9px] border border-black/10 bg-white/70 px-[10px] text-[12px] text-text-primary outline-none dark:border-white/10 dark:bg-white/[0.07]"
+              >
+                {audioOutputs.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))}
+                {!audioOutputs.some((device) => device.deviceId === outputDeviceId) && (
+                  <option value={outputDeviceId}>Saved device (unavailable)</option>
+                )}
+              </select>
+              {outputError ? <span className="text-[11px] text-red-500">{outputError}</span> : null}
+            </div>
+          ) : (
+            <span className="text-[12px] text-text-tertiary">Not supported</span>
+          )
         }
       />
       <SettingRow

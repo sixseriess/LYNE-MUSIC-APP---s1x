@@ -7,7 +7,7 @@ import {
 } from "./webRemixAudio";
 import { resolveWithProfile } from "./profileAudio";
 import { assertStreamReachable, isStreamRefused } from "./streamProbe";
-import type { ResolvedAudioStream } from "./innertubeAudioFormats";
+import type { ResolvedAudioStream, StreamAudioQuality } from "./innertubeAudioFormats";
 
 export type { ResolvedAudioStream } from "./innertubeAudioFormats";
 
@@ -90,6 +90,7 @@ async function resolveViaWebRemix(
 export interface ResolveAudioOptions {
   signal?: AbortSignal;
   preferredCodec?: "opus" | "aac";
+  audioQuality?: StreamAudioQuality;
   profiles?: readonly InnertubeProfile[];
 }
 

@@ -10,6 +10,7 @@ const EMPTY_STATE: PlayerState = {
   positionMs: 0,
   durationMs: 0,
   volume: 1,
+  outputDeviceId: "default",
   repeat: "off",
   shuffle: false,
   error: null,

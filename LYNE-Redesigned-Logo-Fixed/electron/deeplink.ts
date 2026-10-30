@@ -1,7 +1,8 @@
-// liner:// deeplink parsing, shared by main process (no electron imports here
+// lyne:// deeplink parsing, shared by main process (no electron imports here
 // so vitest can cover it). same strict allowlist as the link server: fixed
 // entity types, opaque catalog tokens only.
-export const DEEP_LINK_SCHEME = "liner";
+export const DEEP_LINK_SCHEME = "lyne";
+const LEGACY_DEEP_LINK_SCHEME = "liner";
 
 const DEEP_LINK_IDS: Record<string, RegExp> = {
   // Artist navigation also supports display-name fallbacks when a track has no
@@ -30,7 +31,7 @@ export function parseDeeplink(raw: string): DeeplinkTarget | null {
   } catch {
     return null;
   }
-  if (url.protocol !== `${DEEP_LINK_SCHEME}:`) return null;
+  if (url.protocol !== `${DEEP_LINK_SCHEME}:` && url.protocol !== `${LEGACY_DEEP_LINK_SCHEME}:`) return null;
   const type = url.hostname.toLowerCase();
   const pattern = DEEP_LINK_IDS[type];
   if (!pattern) return null;
@@ -43,5 +44,5 @@ export function parseDeeplink(raw: string): DeeplinkTarget | null {
 }
 
 export function findDeeplinkArg(argv: string[]): string | undefined {
-  return argv.find((arg) => arg.startsWith(`${DEEP_LINK_SCHEME}://`));
+  return argv.find((arg) => arg.startsWith(`${DEEP_LINK_SCHEME}://`) || arg.startsWith(`${LEGACY_DEEP_LINK_SCHEME}://`));
 }

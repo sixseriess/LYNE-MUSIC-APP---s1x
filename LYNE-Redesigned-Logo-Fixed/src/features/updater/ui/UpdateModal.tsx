@@ -16,7 +16,7 @@ export default function UpdateModal() {
   const releaseTag = updateInfo.version.startsWith("v")
     ? updateInfo.version
     : `v${updateInfo.version}`;
-  const changelogUrl = `https://github.com/tryliner/desktop/releases/tag/${releaseTag}`;
+  const changelogUrl = `https://github.com/sixseriess/LYNE-MUSIC-APP---s1x/releases/tag/${releaseTag}`;
 
   return (
     <Dialog
@@ -32,7 +32,7 @@ export default function UpdateModal() {
           description={
             <>
               {t("updater.modal_desc", { version: updateInfo.version }) ||
-                `A new version of Liner (v${updateInfo.version}) is ready.`}{" "}
+                `A new version of LYNE (v${updateInfo.version}) is ready.`}{" "}
               <a
                 href={changelogUrl}
                 target="_blank"

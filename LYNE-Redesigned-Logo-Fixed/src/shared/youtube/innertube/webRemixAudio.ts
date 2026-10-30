@@ -6,6 +6,7 @@ import {
   toResolvedStream,
   type AudioFormat,
   type ResolvedAudioStream,
+  type StreamAudioQuality,
 } from "./innertubeAudioFormats";
 
 interface WebRemixSession {
@@ -73,7 +74,7 @@ async function mintContentPoToken(videoId: string): Promise<string> {
       ? undefined
       : window.linerElectron?.mintPoToken;
   if (!mint)
-    throw new InnertubeError("PO tokens need a newer Liner app version.", 501);
+    throw new InnertubeError("PO tokens need a newer LYNE app version.", 501);
   return mint(videoId);
 }
 
@@ -84,7 +85,7 @@ function throwIfAborted(signal?: AbortSignal): void {
 
 export async function resolveWebRemixAudioStream(
   videoId: string,
-  options: { signal?: AbortSignal; preferredCodec?: "opus" | "aac" } = {},
+  options: { signal?: AbortSignal; preferredCodec?: "opus" | "aac"; audioQuality?: StreamAudioQuality } = {},
 ): Promise<ResolvedAudioStream> {
   installPlayerEvaluator();
   const [poToken, visitorData] = await Promise.all([
@@ -121,7 +122,7 @@ export async function resolveWebRemixAudioStream(
       ? { contentLength: Number(format.content_length) }
       : {}),
   }));
-  const best = selectBestAudioFormat(candidates, options.preferredCodec);
+  const best = selectBestAudioFormat(candidates, options.preferredCodec, options.audioQuality);
   const source = best
     ? audioFormats.find((format) => format.itag === best.itag)
     : undefined;

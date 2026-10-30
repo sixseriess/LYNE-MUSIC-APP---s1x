@@ -8,7 +8,7 @@ interface DeeplinkTarget {
   id: string;
 }
 
-// opens shared entities arriving via liner:// deeplinks (main pre-validates)
+// opens shared entities arriving via lyne:// deeplinks (main pre-validates)
 export default function DeeplinkHandler() {
   const navigate = useNavigate();
 

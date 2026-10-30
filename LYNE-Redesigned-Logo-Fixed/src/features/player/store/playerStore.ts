@@ -17,7 +17,7 @@ export { debouncedStorage };
 export type RepeatMode = "off" | "all" | "one";
 export type PlayerStatus = "idle" | "loading" | "playing" | "paused" | "error";
 export type MiniPlayerStyle = "default" | "rounded";
-export type AudioQuality = "low" | "standard" | "high" | "lossless";
+export type AudioQuality = "low" | "standard" | "high";
 export type TrackDoubleClickBehavior = "play" | "queue";
 export type DefaultPlaybackContext = "resume" | "empty";
 export type AccentVariant =
@@ -56,6 +56,7 @@ export interface QueueState {
 
 export interface SessionState {
   volume: number;
+  outputDeviceId: string;
   repeat: RepeatMode;
   shuffle: boolean;
   audioQuality: AudioQuality;
@@ -111,6 +112,7 @@ export interface PlayerStore extends PlayerState {
   setRepeat: (mode: RepeatMode) => void;
   setShuffle: (shuffle: boolean) => void;
   setVolume: (volume: number) => void;
+  setOutputDeviceId: (deviceId: string) => void;
   setCurrentTrack: (track: Track | null, index: number) => void;
   setQueue: (queue: Track[]) => void;
   setPlaybackContext: (context: string | null) => void;
@@ -185,6 +187,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
       // SessionSlice
       volume: 1,
+      outputDeviceId: "default",
       repeat: "off",
       shuffle: false,
       audioQuality: "high",
@@ -216,6 +219,7 @@ export const usePlayerStore = create<PlayerStore>()(
       setRepeat: (repeat) => set({ repeat }),
       setShuffle: (shuffle) => set({ shuffle }),
       setVolume: (volume) => set({ volume }),
+      setOutputDeviceId: (outputDeviceId) => set({ outputDeviceId }),
       setCurrentTrack: (currentTrack, currentIndex) => {
         const prev = get().currentTrack;
         const isDifferent = prev?.id !== currentTrack?.id;
@@ -306,6 +310,12 @@ export const usePlayerStore = create<PlayerStore>()(
           ...current,
           ...((persisted ?? {}) as Partial<PlayerStore>),
         };
+        if (!["low", "standard", "high"].includes(String(merged.audioQuality))) {
+          merged.audioQuality = "high";
+        }
+        if (typeof merged.outputDeviceId !== "string") {
+          merged.outputDeviceId = "default";
+        }
         const resume = readResumePosition();
         if (resume && merged.currentTrack?.id === resume.trackId) {
           merged.positionMs = resume.positionMs;
@@ -389,6 +399,7 @@ export const usePlayerStore = create<PlayerStore>()(
         repeat: state.repeat,
         shuffle: state.shuffle,
         volume: state.volume,
+        outputDeviceId: state.outputDeviceId,
         audioQuality: state.audioQuality,
         miniPlayerStyle: state.miniPlayerStyle,
         accentVariant: state.accentVariant,
