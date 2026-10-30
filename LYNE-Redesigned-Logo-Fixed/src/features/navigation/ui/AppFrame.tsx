@@ -130,6 +130,26 @@ export default function AppFrame({ children }: AppFrameProps) {
   const [fullscreenEffectsReady, setFullscreenEffectsReady] = useState(false);
 
   useEffect(() => {
+    const applySavedBackground = () => {
+      const shell = document.querySelector<HTMLElement>(".app-shell-enter");
+      if (!shell) return;
+      try {
+        const saved = localStorage.getItem("lyne_custom_background_v1");
+        shell.style.backgroundImage = saved
+          ? `linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), url("${saved}")`
+          : "";
+        shell.style.backgroundSize = saved ? "cover" : "";
+        shell.style.backgroundPosition = saved ? "center" : "";
+        shell.style.backgroundAttachment = saved ? "fixed" : "";
+        shell.style.backgroundRepeat = saved ? "no-repeat" : "";
+      } catch {}
+    };
+    applySavedBackground();
+    const frame = requestAnimationFrame(applySavedBackground);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
     if (pathname === "/settings") {
       openSettings();
       navigate("/", { replace: true });
