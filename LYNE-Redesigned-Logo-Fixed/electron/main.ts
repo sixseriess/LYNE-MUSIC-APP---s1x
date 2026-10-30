@@ -432,16 +432,36 @@ function createWindow() {
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    bundleManager = new BundleManager({
-      defaultRendererDist: RENDERER_DIST,
-    });
-    bundleManager.setMainWindow(mainWindow);
+    // LYNE must never consume Liner's OTA bundle feed. OTA is opt-in and only
+    // enabled when an explicitly configured LYNE endpoint and key are present.
+    const otaEnabled =
+      process.env.LYNE_ENABLE_OTA_UPDATES === "true" &&
+      Boolean(process.env.LYNE_UPDATER_URL) &&
+      Boolean(process.env.LYNE_UPDATER_PUBLIC_KEY);
+
+    bundleManager = otaEnabled
+      ? new BundleManager({
+          defaultRendererDist: RENDERER_DIST,
+          updaterUrl: process.env.LYNE_UPDATER_URL,
+          publicKeyHex: process.env.LYNE_UPDATER_PUBLIC_KEY,
+        })
+      : null;
+
+    if (bundleManager) bundleManager.setMainWindow(mainWindow);
+    else
+      console.info(
+        "[LYNE] Remote bundle updates are disabled; loading the bundled app.",
+      );
+
     const manager = bundleManager;
     const win = mainWindow;
     void (async () => {
-      if (app.isPackaged)
+      if (app.isPackaged && manager)
         await manager.updateBeforeLaunch().catch(() => undefined);
-      if (!win.isDestroyed()) win.loadFile(manager.getEffectiveIndexPath());
+      const indexPath =
+        manager?.getEffectiveIndexPath() ??
+        path.join(RENDERER_DIST, "index.html");
+      if (!win.isDestroyed()) win.loadFile(indexPath);
     })();
   }
 
