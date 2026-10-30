@@ -1,0 +1,15 @@
+LYNE — GITHUB BUILD KIT (FIXED)
+
+IMPORTANT: Extract this ZIP, then upload the CONTENTS into your GitHub repository. Do not upload the ZIP as a file.
+
+This workflow automatically locates the LYNE package.json, even if GitHub has an extra parent folder around the app. The project package.json is also included at the ZIP root.
+
+STEPS
+1. In your GitHub repository, remove the old uploaded project files so you do not have duplicate/nested copies.
+2. Extract this ZIP on your PC.
+3. Open the extracted folder. Select everything INSIDE it (including package.json, pnpm-lock.yaml, pnpm-workspace.yaml, and .github).
+4. Drag those selected contents into the main page of your GitHub repository and commit.
+5. Open Actions, select Build LYNE for Windows, then Run workflow.
+6. When it succeeds, open the run and download LYNE-Windows-Installer under Artifacts.
+
+The workflow is configured for Windows and builds the existing Electron Windows installer. A successful GitHub-hosted build has not yet been verified.

@@ -1,0 +1,18 @@
+LYNE GitHub Build Kit
+
+QUICK START
+1. Create a new repository on GitHub.
+2. Upload the CONTENTS of this ZIP (not the ZIP file itself).
+3. Open the repository's Actions tab.
+4. Choose "Build LYNE for Windows".
+5. Click "Run workflow".
+6. Download "LYNE-Windows-Installer" from the completed run's Artifacts section.
+
+AUTOMATIC RELEASES
+Push a tag beginning with v (for example v0.2.11) to build and publish a GitHub Release.
+
+NOTES
+- The workflow builds the Windows installer using the project's existing Electron build script.
+- It uses pnpm 10 and explicitly declares the project as the workspace package.
+- The app's Electron package metadata is branded LYNE.
+- The workflow has been added, but a GitHub-hosted build has not yet been run or verified.

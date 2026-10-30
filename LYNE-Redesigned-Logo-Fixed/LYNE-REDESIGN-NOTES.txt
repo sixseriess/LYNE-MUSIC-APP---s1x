@@ -1,0 +1,11 @@
+LYNE VISUAL REFRESH
+
+This update changes the app's visual theme only:
+- Replaces the old red accent palette with LYNE's electric-lime accent.
+- Introduces a deeper graphite/near-black dark theme with softer borders and clearer text contrast.
+- Refines sidebar surface depth and active navigation treatment.
+- Updates the desktop header's accessible logo name/title to LYNE.
+
+Playback, authentication, navigation, library data, APIs, Electron configuration, and GitHub Actions workflow were intentionally left intact.
+
+Build verification: source files were inspected and edited, but a full dependency install / Windows Electron build was not run in this environment. Please run the existing GitHub Actions workflow to verify the Windows installer.
