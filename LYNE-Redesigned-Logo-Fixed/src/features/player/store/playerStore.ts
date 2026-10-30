@@ -17,7 +17,7 @@ export { debouncedStorage };
 export type RepeatMode = "off" | "all" | "one";
 export type PlayerStatus = "idle" | "loading" | "playing" | "paused" | "error";
 export type MiniPlayerStyle = "default" | "rounded";
-export type AudioQuality = "low" | "standard" | "high";
+export type AudioQuality = "low" | "standard" | "high" | "lossless";
 export type TrackDoubleClickBehavior = "play" | "queue";
 export type DefaultPlaybackContext = "resume" | "empty";
 export type AccentVariant =
@@ -310,7 +310,7 @@ export const usePlayerStore = create<PlayerStore>()(
           ...current,
           ...((persisted ?? {}) as Partial<PlayerStore>),
         };
-        if (!["low", "standard", "high"].includes(String(merged.audioQuality))) {
+        if (!["low", "standard", "high", "lossless"].includes(String(merged.audioQuality))) {
           merged.audioQuality = "high";
         }
         if (typeof merged.outputDeviceId !== "string") {
