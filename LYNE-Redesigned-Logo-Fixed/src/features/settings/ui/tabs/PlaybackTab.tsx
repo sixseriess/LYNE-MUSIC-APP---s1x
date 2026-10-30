@@ -33,7 +33,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
     let active = true;
     const mediaDevices = navigator.mediaDevices;
     const refreshOutputs = async () => {
-      setOutputSupported(playerRuntime.supportsAudioOutputSelection());
+      setOutputSupported(Boolean(playerRuntime?.supportsAudioOutputSelection()));
       if (!mediaDevices?.enumerateDevices) return;
       try {
         const devices = await mediaDevices.enumerateDevices();
@@ -60,8 +60,13 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
   const handleOutputChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const deviceId = event.currentTarget.value;
     setOutputError("");
+    const runtime = playerRuntime;
+    if (!runtime) {
+      setOutputError("Audio playback is not initialized yet.");
+      return;
+    }
     try {
-      await playerRuntime.setAudioOutputDevice(deviceId);
+      await runtime.setAudioOutputDevice(deviceId);
       setOutputDeviceId(deviceId);
     } catch (error) {
       setOutputError(error instanceof Error ? error.message : "Couldn't change audio output.");
