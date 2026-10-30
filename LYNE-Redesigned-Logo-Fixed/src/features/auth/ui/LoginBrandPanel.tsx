@@ -27,7 +27,7 @@ export function LoginBrandPanel({ title, subtitle }: LoginBrandPanelProps) {
       <div className="relative flex items-center gap-[10px]">
         <img
           src={logo}
-          alt="Liner"
+          alt="LYNE"
           width={112}
           height={56}
           draggable={false}

@@ -62,6 +62,9 @@ const TAB_GROUPS: { labelKey: TabGroupKey; ids: TabId[] }[] = [
 
 const SETTING_ITEMS: { tabId: TabId; titleKey: string; descKey?: string }[] = [
   // Playback
+  { tabId: "Playback", titleKey: "Master volume", descKey: "Set the overall playback volume" },
+  { tabId: "Playback", titleKey: "Playback speed", descKey: "Adjust the speed of the current and future tracks" },
+  { tabId: "Playback", titleKey: "Audio quality", descKey: "Choose the preferred streaming quality" },
   {
     tabId: "Playback",
     titleKey: "settings.autoplay_similar.title",
@@ -205,6 +208,7 @@ const SETTING_ITEMS: { tabId: TabId; titleKey: string; descKey?: string }[] = [
   },
 
   // Appearance
+  { tabId: "Appearance", titleKey: "Custom background", descKey: "Choose an image to use behind the app" },
   {
     tabId: "Appearance",
     titleKey: "settings.language.label",
