@@ -12,7 +12,7 @@ export interface AudioFormat {
 export interface ResolvedAudioStream {
   url: string;
   mimeType: string;
-  codec: "opus" | "aac";
+  codec: "opus" | "aac" | "flac" | "alac" | "pcm" | "wav" | "aiff";
   bitrate: number;
   itag: number;
   expiresAt: string | null;
@@ -21,7 +21,11 @@ export interface ResolvedAudioStream {
 
 const PREFERRED_ITAGS = [251, 140, 250, 249, 139];
 
-export type StreamAudioQuality = "low" | "standard" | "high";
+export type StreamAudioQuality = "low" | "standard" | "high" | "lossless";
+
+export function isLosslessAudioFormat(format: AudioFormat): boolean {
+  return /flac|alac|pcm|wav|wave|aiff|aifc|audio\/l(16|24|32)/i.test(format.mimeType);
+}
 
 function toAudioFormat(raw: unknown): AudioFormat | null {
   const format = asRecord(raw);
@@ -70,7 +74,7 @@ export function selectBestAudioFormat(
 ): AudioFormat | null {
   if (formats.length === 0) return null;
 
-  const codecFormats = preferredCodec
+  const codecFormats = preferredCodec && quality !== "lossless"
     ? formats.filter((format) =>
         preferredCodec === "opus"
           ? format.mimeType.includes("opus") || format.mimeType.includes("webm")
@@ -81,6 +85,17 @@ export function selectBestAudioFormat(
   const withBitrate = candidates.filter(
     (format) => Number.isFinite(format.bitrate) && format.bitrate > 0,
   );
+
+  if (quality === "lossless") {
+    const losslessFormats = candidates.filter(isLosslessAudioFormat);
+    if (losslessFormats.length > 0) {
+      return [...losslessFormats].sort((a, b) => b.bitrate - a.bitrate)[0] ?? null;
+    }
+    // Lossy catalogs do not expose lossless audio; use the highest source format.
+    if (withBitrate.length > 0) {
+      return [...withBitrate].sort((a, b) => b.bitrate - a.bitrate)[0] ?? null;
+    }
+  }
 
   if (withBitrate.length > 0 && quality === "low") {
     return [...withBitrate].sort((a, b) => a.bitrate - b.bitrate)[0] ?? null;
@@ -119,12 +134,18 @@ function expiryFromUrl(url: string): string | null {
 }
 
 export function toResolvedStream(format: AudioFormat): ResolvedAudioStream {
-  const isOpus =
-    format.mimeType.includes("opus") || format.mimeType.includes("webm");
+  const normalizedMime = format.mimeType.toLowerCase();
+  const isOpus = normalizedMime.includes("opus") || normalizedMime.includes("webm");
+  const codec = normalizedMime.includes("flac") ? "flac"
+    : normalizedMime.includes("alac") ? "alac"
+    : normalizedMime.includes("pcm") ? "pcm"
+    : normalizedMime.includes("wav") || normalizedMime.includes("wave") ? "wav"
+    : normalizedMime.includes("aiff") || normalizedMime.includes("aifc") ? "aiff"
+    : isOpus ? "opus" : "aac";
   return {
     url: format.url,
     mimeType: format.mimeType.split(";")[0]?.trim() || "audio/webm",
-    codec: isOpus ? "opus" : "aac",
+    codec,
     bitrate: format.bitrate || 160_000,
     itag: format.itag,
     expiresAt: expiryFromUrl(format.url),

@@ -114,6 +114,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 process.env.APP_ROOT = path.join(__dirname, "..");
 
+app.setName("LYNE");
+if (process.platform === "win32") {
+  app.setAppUserModelId("com.lyne.music");
+}
+
 export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 
@@ -744,7 +749,7 @@ if (!gotTheLock) {
           return desktopName.trim();
         }
       } catch {}
-      return "liner";
+      return "lyne";
     };
 
     const installLinuxAppIcon = async (iconName: string, png: Buffer) => {

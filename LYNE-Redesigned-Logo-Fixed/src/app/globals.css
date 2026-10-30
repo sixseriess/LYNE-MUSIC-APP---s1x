@@ -537,30 +537,27 @@ html[data-hover-reset] [data-window-controls] button:hover {
 }
 
 
-/* LYNE visual refresh — quiet graphite surfaces, warm white type, electric lime. */
-:root,
+/* LYNE visual refresh — theme-aware surfaces and electric lime. */
 :root[data-theme="dark"],
-:root.dark,
-[data-theme="dark"],
-.dark {
-  --bg-canvas: #090b09;
-  --bg-surface: #101310;
-  --bg-primary: #0c0f0c;
-  --bg-elevated: #171b16;
-  --bg-panel: #1b2019;
-  --bg-overlay: rgba(10, 13, 10, 0.97);
+:root.dark {
+  --bg-canvas: #09090b;
+  --bg-surface: #101012;
+  --bg-primary: #0c0c0f;
+  --bg-elevated: #17171b;
+  --bg-panel: #1b1b20;
+  --bg-overlay: rgba(10, 10, 12, 0.97);
   --bg-toolbox: rgba(255, 255, 255, 0.045);
   --bg-toolbox-active: rgba(200, 245, 106, 0.12);
-  --bg-glass: rgba(18, 22, 17, 0.82);
+  --bg-glass: rgba(18, 18, 21, 0.86);
   --border-toolbox-divider: rgba(255, 255, 255, 0.075);
   --border-primary: rgba(255, 255, 255, 0.075);
   --border-secondary: rgba(255, 255, 255, 0.11);
   --border-tertiary: rgba(255, 255, 255, 0.2);
   --border-white-alpha-14: rgba(255, 255, 255, 0.07);
   --border-white-alpha-33: rgba(255, 255, 255, 0.15);
-  --text-primary: #f4f6ef;
-  --text-secondary: rgba(237, 242, 229, 0.66);
-  --text-tertiary: rgba(237, 242, 229, 0.4);
+  --text-primary: #f4f4f5;
+  --text-secondary: rgba(237, 237, 242, 0.68);
+  --text-tertiary: rgba(237, 237, 242, 0.42);
   --accent-primary: #c8f56a;
   --accent-secondary: #d8ff8b;
   --accent-tertiary: #e8ffb8;
@@ -568,8 +565,9 @@ html[data-hover-reset] [data-window-controls] button:hover {
   --btn-primary-text: #11150c;
 }
 
-html, body {
-  background: #090b09;
+html,
+body {
+  background: var(--bg-canvas);
 }
 
 body {
@@ -577,20 +575,30 @@ body {
   letter-spacing: -0.012em;
 }
 
-/* A little more depth and separation, while leaving the original layout intact. */
+/* Preserve the layout while letting the selected theme control the surfaces. */
 .app-shell-enter {
-  background: radial-gradient(ellipse at 52% -18%, rgba(174, 220, 93, 0.075), transparent 48%), #090b09 !important;
+  background-color: var(--bg-canvas);
+}
+
+:root[data-theme="dark"] .app-shell-enter,
+:root.dark .app-shell-enter {
+  background-image: radial-gradient(ellipse at 52% -18%, rgba(255, 255, 255, 0.035), transparent 48%);
+}
+
+:root[data-theme="light"] .app-shell-enter,
+:root.light .app-shell-enter {
+  background-image: radial-gradient(ellipse at 52% -18%, rgba(24, 24, 27, 0.025), transparent 48%);
 }
 
 .app-shell-enter aside > div,
 .app-shell-enter header [class*="backdrop-blur"],
 .app-shell-enter main > div[class*="rounded"] {
-  border: 1px solid rgba(255,255,255,0.055);
+  border: 1px solid var(--border-primary);
 }
 
 .app-shell-enter aside > div {
-  background: linear-gradient(180deg, rgba(24,29,21,.94), rgba(14,17,13,.94)) !important;
-  box-shadow: 0 18px 50px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.035);
+  background: var(--bg-glass) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.10), inset 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .app-shell-enter button,
@@ -604,31 +612,30 @@ body {
   position: absolute;
   inset: -9px -10px;
   border-radius: 13px;
-  background: rgba(200,245,106,.105);
-  border: 1px solid rgba(200,245,106,.12);
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 14%, transparent);
 }
 
 .app-shell-enter aside a[aria-current="page"] svg,
 .app-shell-enter aside button[aria-pressed="true"] svg {
-  color: #c8f56a !important;
+  color: var(--accent-primary) !important;
   opacity: 1 !important;
-  filter: drop-shadow(0 0 9px rgba(200,245,106,.2));
+  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--accent-primary) 20%, transparent));
 }
 
-/* Refined cards and controls across Home, Library, playlists and settings. */
 .app-shell-enter [class*="rounded-2xl"],
 .app-shell-enter [class*="rounded-xl"] {
-  border-color: rgba(255,255,255,.065);
+  border-color: var(--border-primary);
 }
 
 .app-shell-enter input,
 .app-shell-enter textarea {
-  color: #f4f6ef;
+  color: var(--text-primary);
 }
 
 .app-shell-enter ::selection {
-  color: #10140b;
-  background: #c8f56a;
+  color: var(--btn-primary-text);
+  background: var(--accent-primary);
 }
 
 .theme-logo { filter: none !important; }

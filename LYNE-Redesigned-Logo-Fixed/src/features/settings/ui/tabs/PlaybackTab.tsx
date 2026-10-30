@@ -112,7 +112,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
       />
       <SettingRow
         title="Audio quality"
-        description="Set the target bitrate for newly played YouTube tracks."
+        description="Prefer lossless audio when the source provides it. YouTube streams are lossy, so LYNE uses their highest available quality."
         searchQuery={searchQuery}
         control={
           mounted ? (
@@ -124,6 +124,7 @@ export function PlaybackTab({ searchQuery }: { searchQuery?: string }) {
                 { value: "low", label: "Low" },
                 { value: "standard", label: "Normal" },
                 { value: "high", label: "High" },
+                { value: "lossless", label: "Lossless" },
               ]}
             />
           ) : <span />

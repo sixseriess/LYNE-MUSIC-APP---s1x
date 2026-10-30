@@ -24,4 +24,16 @@ describe("selectBestAudioFormat quality preference", () => {
   it("honors the preferred codec before comparing bitrate", () => {
     expect(selectBestAudioFormat(formats, "opus", "high")?.url).toBe("high");
   });
+
+  it("selects a true lossless format when the source provides one", () => {
+    const withLossless: AudioFormat[] = [
+      ...formats,
+      { itag: 999, url: "flac", mimeType: "audio/flac", bitrate: 900_000 },
+    ];
+    expect(selectBestAudioFormat(withLossless, "opus", "lossless")?.url).toBe("flac");
+  });
+
+  it("uses the highest available stream when no lossless source exists", () => {
+    expect(selectBestAudioFormat(formats, undefined, "lossless")?.url).toBe("highest");
+  });
 });
