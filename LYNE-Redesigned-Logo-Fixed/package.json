@@ -28,7 +28,8 @@
     "electron:build:win": "pnpm generate:brand-assets && pnpm native:build && tsc -b && vite build && electron-builder --win --publish never",
     "electron:build:mac": "pnpm generate:brand-assets && tsc -b && vite build && electron-builder --mac",
     "native:build": "node scripts/build-native-addon.cjs",
-    "generate:brand-assets": "node scripts/generate-brand-assets.mjs"
+    "generate:brand-assets": "node scripts/generate-brand-assets.mjs",
+    "build:pwa": "tsc -b && vite build --mode pwa"
   },
   "build": {
     "appId": "com.lyne.music",

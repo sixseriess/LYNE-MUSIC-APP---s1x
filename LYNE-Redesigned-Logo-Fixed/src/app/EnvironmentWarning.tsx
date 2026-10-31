@@ -16,6 +16,7 @@ export default function EnvironmentWarning() {
     }
   });
 
+  if (__LYNE_PWA__) return null;
   if (typeof window !== "undefined" && window.linerElectron) return null;
   if (skipped) return null;
 

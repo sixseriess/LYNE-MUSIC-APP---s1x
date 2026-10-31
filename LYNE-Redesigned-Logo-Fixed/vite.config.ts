@@ -7,6 +7,8 @@ import pkg from "./package.json" with { type: "json" };
 import { contentSecurityPolicyPlugin } from "./vite.csp.ts";
 
 export default defineConfig(({ command, mode }) => {
+  const isPwaBuild = command === "build" && mode === "pwa";
+
   if (command === "serve") {
     const devEnv = loadEnv(mode, process.cwd(), ["LINER_", "VITE_API_URL"]);
     for (const name of [
@@ -20,14 +22,16 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
+    base: isPwaBuild ? "/LYNE-MUSIC-APP---s1x/" : "/",
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
+      __LYNE_PWA__: JSON.stringify(isPwaBuild),
     },
     plugins: [
       react(),
       tailwindcss(),
       contentSecurityPolicyPlugin(),
-      electron({
+      ...(isPwaBuild ? [] : [electron({
         main: {
           entry: "electron/main.ts",
         },
@@ -44,7 +48,7 @@ export default defineConfig(({ command, mode }) => {
             },
           },
         },
-      }),
+      })]),
     ],
     clearScreen: false,
     resolve: {

@@ -6,6 +6,24 @@ import { applyStoredTheme } from "@/shared/utils/storedTheme";
 
 initGlobalErrorHandlers();
 
+if (__LYNE_PWA__) {
+  document.documentElement.classList.add("lyne-pwa");
+  document.body.classList.remove("p-1");
+  document.body.classList.add("p-0");
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      void navigator.serviceWorker
+        .register(`${import.meta.env.BASE_URL}sw.js`, {
+          scope: import.meta.env.BASE_URL,
+        })
+        .catch((error) => {
+          console.warn("[LYNE PWA] Service worker registration failed:", error);
+        });
+    });
+  }
+}
+
 const isOverlay = window.location.hash.startsWith("#/overlay");
 
 if (!isOverlay) applyStoredTheme();

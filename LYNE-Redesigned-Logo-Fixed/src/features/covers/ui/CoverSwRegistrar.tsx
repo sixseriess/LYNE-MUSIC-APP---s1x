@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 export function CoverSwRegistrar() {
   useEffect(() => {
+    if (__LYNE_PWA__) return;
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
