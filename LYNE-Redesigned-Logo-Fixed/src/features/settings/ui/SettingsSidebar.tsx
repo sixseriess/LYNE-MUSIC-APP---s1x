@@ -36,8 +36,11 @@ export function SettingsSidebar<T extends string>({
 }: SettingsSidebarProps<T>) {
   const { t } = useTranslation();
   const { attach, onScroll, style } = useScrollFade<HTMLElement>();
-  const openExternal = (url: string) =>
-    window.open(url, "_blank", "noopener,noreferrer");
+  const REPOSITORY_URL = "https://github.com/sixseriess/LYNE-MUSIC-APP---s1x";
+const SUPPORT_URL = "https://discord.gg/WtzrU9ERbN";
+
+const openExternal = (url: string) =>
+  window.open(url, "_blank", "noopener,noreferrer");
 
   return (
     <aside className="flex min-h-0 w-[240px] shrink-0 flex-col font-sans">
@@ -101,14 +104,14 @@ export function SettingsSidebar<T extends string>({
             label={t("settings.docs")}
             onClick={() =>
               openExternal(
-                "https://github.com/tryliner/desktop/blob/main/README.md",
+                REPOSITORY_URL,
               )
             }
           />
           <NavItem
             icon={QuestionCircle}
             label={t("settings.support")}
-            onClick={() => openExternal("https://discord.gg/liner")}
+            onClick={() => openExternal(SUPPORT_URL)}
           />
         </div>
       </nav>
