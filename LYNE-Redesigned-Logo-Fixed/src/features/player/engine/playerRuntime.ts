@@ -1,4 +1,5 @@
 import { usePlayerStore } from "../store/playerStore";
+import { useListeningStatsStore } from "../store/listeningStatsStore";
 import { ApiError } from "@/shared/api";
 import { log } from "@/shared/utils/logger";
 import { telemetry } from "@/shared/telemetry";
@@ -59,6 +60,7 @@ export class PlayerRuntime {
   // loaded / cached track fires waiting -> playing within milliseconds, and flipping
   // the status for that re-animated the play / pause button on every seek
   private waitingTimer: ReturnType<typeof setTimeout> | null = null;
+  private listeningStatsLastTickAt: number | null = null;
   public onEnded?: () => void;
   public onError?: (info: { trackId: string; message: string }) => void;
 
@@ -281,7 +283,31 @@ export class PlayerRuntime {
   private setupAudioListeners(audioEl: HTMLAudioElement) {
     audioEl.addEventListener("timeupdate", () => {
       if (this.isResetting || audioEl !== this.audio) return;
-      if (!this.currentTrackId) return;
+      if (!this.currentTrackId) {
+        this.listeningStatsLastTickAt = null;
+        return;
+      }
+      const playerState = usePlayerStore.getState();
+      const now = Date.now();
+      if (
+        audioEl.paused ||
+        playerState.status !== "playing" ||
+        !playerState.currentTrack ||
+        this.attachedTrackId !== this.currentTrackId ||
+        Number.isNaN(audioEl.currentTime)
+      ) {
+        this.listeningStatsLastTickAt = null;
+      } else {
+        const previousTick = this.listeningStatsLastTickAt;
+        if (previousTick !== null) {
+          const elapsed = now - previousTick;
+          // Ignore long gaps caused by sleep, suspension, or buffering.
+          if (elapsed > 0 && elapsed <= 2000) {
+            useListeningStatsStore.getState().addListeningTime(elapsed, now);
+          }
+        }
+        this.listeningStatsLastTickAt = now;
+      }
       if (usePlayerStore.getState().status === "loading") return;
       if (Number.isNaN(audioEl.currentTime)) return;
 
@@ -319,6 +345,16 @@ export class PlayerRuntime {
         this.syncMediaSessionPosition();
       });
     }
+
+    for (const type of ["pause", "waiting", "stalled", "emptied", "ended"]) {
+      audioEl.addEventListener(type, () => {
+        if (audioEl === this.audio) this.listeningStatsLastTickAt = null;
+      });
+    }
+
+    audioEl.addEventListener("playing", () => {
+      if (audioEl === this.audio) this.listeningStatsLastTickAt = Date.now();
+    });
 
     audioEl.addEventListener("waiting", () => {
       if (this.isResetting || audioEl !== this.audio) return;

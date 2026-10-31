@@ -5,6 +5,7 @@ import {
   DiscordFill,
   KeyboardFill,
   YoutubeFill,
+  MusicLine,
 } from "@mingcute/react";
 import {
   Play,
@@ -27,11 +28,13 @@ import {
   OverlayTab,
   DiscordTab,
   YoutubeTab,
+  ListeningStatsTab,
 } from "./tabs";
 import { SettingsSidebar, type SettingsNavIconProps } from "./SettingsSidebar";
 
 type TabId =
   | "Playback"
+  | "Listening"
   | "Shortcuts"
   | "Overlay"
   | "Discord"
@@ -42,6 +45,7 @@ type TabId =
 
 const TAB_ICONS: Record<TabId, React.ComponentType<SettingsNavIconProps>> = {
   Playback: Play,
+  Listening: MusicLine,
   Shortcuts: KeyboardFill,
   Overlay: Widget5,
   Discord: DiscordFill,
@@ -54,13 +58,14 @@ const TAB_ICONS: Record<TabId, React.ComponentType<SettingsNavIconProps>> = {
 type TabGroupKey = "player" | "interface" | "integrations" | "application";
 
 const TAB_GROUPS: { labelKey: TabGroupKey; ids: TabId[] }[] = [
-  { labelKey: "player", ids: ["Playback", "Shortcuts"] },
+  { labelKey: "player", ids: ["Playback", "Listening", "Shortcuts"] },
   { labelKey: "interface", ids: ["Appearance", "Overlay"] },
   { labelKey: "integrations", ids: ["Youtube", "Discord"] },
   { labelKey: "application", ids: ["Storage", "About"] },
 ];
 
 const SETTING_ITEMS: { tabId: TabId; titleKey: string; descKey?: string }[] = [
+  { tabId: "Listening", titleKey: "Total Minutes Listened", descKey: "Track your music listening time in LYNE" },
   // Playback
   { tabId: "Playback", titleKey: "Master volume", descKey: "Set the overall playback volume" },
   { tabId: "Playback", titleKey: "Playback speed", descKey: "Adjust the speed of the current and future tracks" },
@@ -258,6 +263,7 @@ export default function SettingsModal() {
 
   const tabLabels: Record<TabId, string> = {
     Playback: t("settings.tabs.playback"),
+    Listening: "Total Minutes Listened",
     Shortcuts: t("settings.tabs.shortcuts") || "Shortcuts",
     Overlay: t("settings.tabs.overlay") || "Overlay",
     Discord: t("settings.tabs.discord") || "Discord RPC",
@@ -269,6 +275,7 @@ export default function SettingsModal() {
 
   const tabDescriptions: Record<TabId, string> = {
     Playback: t("settings.playback.description"),
+    Listening: "See how long you have listened to music on LYNE.",
     Shortcuts:
       t("settings.shortcuts.description") ||
       "System-wide and player keyboard shortcuts.",
@@ -293,6 +300,7 @@ export default function SettingsModal() {
 
     const TAB_LABEL_KEYS: Record<TabId, string> = {
       Playback: "settings.tabs.playback",
+      Listening: "Total Minutes Listened",
       Shortcuts: "settings.tabs.shortcuts",
       Overlay: "settings.tabs.overlay",
       Discord: "settings.tabs.discord",
@@ -304,6 +312,7 @@ export default function SettingsModal() {
 
     const TAB_DESC_KEYS: Record<TabId, string> = {
       Playback: "settings.playback.description",
+      Listening: "Track your music listening time in LYNE",
       Shortcuts: "settings.shortcuts.description",
       Overlay: "settings.overlay.description",
       Discord: "settings.discord.description",
@@ -419,6 +428,7 @@ export default function SettingsModal() {
               {activeTab === "Playback" && (
                 <PlaybackTab searchQuery={searchQuery} />
               )}
+              {activeTab === "Listening" && <ListeningStatsTab />}
               {activeTab === "Shortcuts" && (
                 <ShortcutsTab searchQuery={searchQuery} />
               )}

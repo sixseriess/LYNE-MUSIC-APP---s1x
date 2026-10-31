@@ -68,6 +68,7 @@ import {
   TrackSearchEmpty,
 } from "./TrackSearch";
 import { useTrackSort, TrackSortMenu } from "./TrackSort";
+import AddSongsModal from "./AddSongsModal";
 
 interface TrackItemProps {
   track: Track;
@@ -377,6 +378,7 @@ function LibraryPlaylistContent() {
 
   const { toast } = useToast();
   const [addedToQueue, setAddedToQueue] = useState(false);
+  const [addSongsOpen, setAddSongsOpen] = useState(false);
 
   const handleAddToQueue = useCallback(() => {
     if (!sortedTracks.length || !viewData) return;
@@ -793,6 +795,17 @@ function LibraryPlaylistContent() {
                   }
                   trailingActions={
                     <>
+                      {!isLikesMode && decodedId ? (
+                        <Button
+                          variant="secondary"
+                          onClick={() => setAddSongsOpen(true)}
+                          className={`${HERO_BUTTON_CLASS} ${HERO_GLASS_BUTTON_CLASS} px-[14px] text-text-primary`}
+                          title="Add songs to this playlist"
+                        >
+                          <AddLine size={16} />
+                          <span>Add Songs</span>
+                        </Button>
+                      ) : null}
                       <TrackSearchField
                         search={search}
                         totalCount={currentTracks.length}
@@ -1089,6 +1102,15 @@ function LibraryPlaylistContent() {
           </div>
         )}
       </div>
+      {!isLikesMode && decodedId && viewData ? (
+        <AddSongsModal
+          open={addSongsOpen}
+          playlistId={decodedId}
+          playlistTitle={viewData.title}
+          existingTracks={currentTracks}
+          onClose={() => setAddSongsOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }
