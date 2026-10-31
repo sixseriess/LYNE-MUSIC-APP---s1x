@@ -25,6 +25,8 @@ import {
 } from "@mingcute/react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import { SidebarNavItems } from "@/widgets/sidebar/ui/SidebarNavItems";
+import { SidebarSettingsButton } from "@/widgets/sidebar/ui/SidebarSettingsButton";
 import { cn } from "@/shared/lib";
 import WindowControlsNotch from "./WindowControlsNotch";
 import RightDrawer from "./RightDrawer";
@@ -745,7 +747,7 @@ export default function AppFrame({ children }: AppFrameProps) {
   return (
     <div
       ref={appFrameRef}
-      className={`app-shell-enter relative flex flex-col h-full w-full overflow-hidden p-1.5 gap-1.5 ${
+      className={`app-shell-enter relative flex flex-col h-full w-full overflow-hidden p-0 sm:p-1.5 gap-0 sm:gap-1.5 ${
         isFullscreenPlayer ? "bg-black" : "bg-bg-canvas"
       } ${isEdgeToEdge ? "rounded-none" : "rounded-[12px]"}`}
       style={isEdgeToEdge ? undefined : { clipPath: "inset(0 round 12px)" }}
@@ -770,7 +772,7 @@ export default function AppFrame({ children }: AppFrameProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="absolute inset-x-1.5 top-1.5 z-[45]"
+            className="absolute inset-x-3 sm:inset-x-1.5 top-[max(8px,env(safe-area-inset-top))] sm:top-1.5 z-[45]"
           >
             <Header
               searchOpen={searchOpen}
@@ -780,10 +782,10 @@ export default function AppFrame({ children }: AppFrameProps) {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 min-h-0 flex flex-row w-full gap-1.5 overflow-hidden relative z-10">
+      <div className="flex-1 min-h-0 flex flex-row w-full gap-0 sm:gap-1.5 overflow-hidden relative z-10">
         <aside
           ref={sidebarRef}
-          className="w-[58px] mt-[56px] shrink-0 z-[45] relative flex flex-col"
+          className="hidden sm:flex w-[58px] mt-[56px] shrink-0 z-[45] relative flex-col"
         >
           <Sidebar
             searchOpen={searchOpen}
@@ -791,14 +793,14 @@ export default function AppFrame({ children }: AppFrameProps) {
           />
         </aside>
 
-        <div className="flex-1 flex flex-col min-w-0 h-full relative gap-1.5 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 h-full relative gap-0 sm:gap-1.5 overflow-hidden">
           <main
             className={cn(
               "flex-1 min-w-0 flex flex-col relative h-full overflow-hidden [--page-inset-top:56px]",
-              "rounded-xl",
+              "rounded-none sm:rounded-xl",
               shouldShowMiniPlayer && hasPageBackdrop
-                ? "[--page-inset-bottom:64px] [--floating-inset-bottom:70px]"
-                : "[--page-inset-bottom:0px] [--floating-inset-bottom:0px]",
+                ? "[--page-inset-bottom:136px] sm:[--page-inset-bottom:64px] [--floating-inset-bottom:140px] sm:[--floating-inset-bottom:70px]"
+                : "[--page-inset-bottom:76px] sm:[--page-inset-bottom:0px] [--floating-inset-bottom:80px] sm:[--floating-inset-bottom:0px]",
             )}
           >
             <div
@@ -864,6 +866,19 @@ export default function AppFrame({ children }: AppFrameProps) {
           )}
         </div>
       </div>
+
+      {!isFullscreenPlayer && !isFullscreenRoute ? (
+        <nav
+          aria-label="Primary navigation"
+          className="mobile-bottom-nav flex sm:hidden shrink-0 items-center justify-around gap-1 px-3 pt-2"
+        >
+          <SidebarNavItems
+            searchOpen={searchOpen}
+            onSearchToggle={handleSearchToggle}
+          />
+          <SidebarSettingsButton />
+        </nav>
+      ) : null}
 
       <AnimatePresence initial={false}>
         {fullscreenPlayerOpen ? (
@@ -992,7 +1007,7 @@ export default function AppFrame({ children }: AppFrameProps) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.99 }}
                   transition={{ duration: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-[min(660px,calc(100vw-72px))] mt-[8px] max-h-[500px] h-[500px] rounded-[8px] pointer-events-auto flex flex-col overflow-hidden bg-bg-panel/95 border border-border-primary/50 backdrop-blur-2xl"
+                  className="w-[calc(100vw-24px)] sm:w-[min(660px,calc(100vw-72px))] mt-[8px] max-h-[min(500px,calc(100dvh-90px))] h-[min(500px,calc(100dvh-90px))] rounded-[8px] pointer-events-auto flex flex-col overflow-hidden bg-bg-panel/95 border border-border-primary/50 backdrop-blur-2xl"
                 >
                   <div className="flex gap-[6px] px-[14px] pt-[12px] pb-[6px] shrink-0 overflow-x-auto">
                     {filterKeys.map((key) => {
@@ -1094,7 +1109,7 @@ export default function AppFrame({ children }: AppFrameProps) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.99 }}
                   transition={{ duration: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-[min(660px,calc(100vw-72px))] mt-[8px] max-h-[480px] h-auto rounded-[8px] pointer-events-auto flex flex-col overflow-hidden bg-bg-panel/95 border border-border-primary/50 backdrop-blur-2xl"
+                  className="w-[calc(100vw-24px)] sm:w-[min(660px,calc(100vw-72px))] mt-[8px] max-h-[min(480px,calc(100dvh-110px))] h-auto rounded-[8px] pointer-events-auto flex flex-col overflow-hidden bg-bg-panel/95 border border-border-primary/50 backdrop-blur-2xl"
                 >
                   <SearchHistoryList
                     onSelectQuery={handleSelectHistoryQuery}
@@ -1115,7 +1130,7 @@ export default function AppFrame({ children }: AppFrameProps) {
       </AnimatePresence>
 
       <AppOverlays />
-      {isFullscreenPlayer && (
+      {isFullscreenPlayer && window.linerElectron && (
         <div
           data-theme="dark"
           className="dark absolute top-1.5 right-1.5 z-[80]"

@@ -1,6 +1,6 @@
 import { forwardRef, memo, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeftLine } from "@mingcute/react";
+import { ArrowLeftLine, Search3Line } from "@mingcute/react";
 import { useTranslation } from "@/languages";
 import { motion } from "framer-motion";
 import WindowControls, {
@@ -58,7 +58,7 @@ export interface HeaderProps {
 }
 
 export const Header = forwardRef<HTMLElement, HeaderProps>(function Header(
-  { className },
+  { className, onSearchToggle },
   ref,
 ) {
   const { pathname } = useLocation();
@@ -92,21 +92,33 @@ export const Header = forwardRef<HTMLElement, HeaderProps>(function Header(
       </div>
 
       {showBack && (
-        <div className="flex-1 min-w-0 flex items-center pl-[22px]">
+        <div className="flex-1 min-w-0 flex items-center pl-[6px] sm:pl-[22px]">
           <BackButton />
         </div>
       )}
 
       <div className="flex items-center gap-[8px] mr-[6px] shrink-0">
-        <motion.div
-          layoutId={WINDOW_CONTROLS_LAYOUT_ID}
-          transition={WINDOW_CONTROLS_MORPH}
-          data-no-window-drag
-          data-no-tooltip="true"
-          className="h-[38px] flex items-center gap-[2px] px-[4px] rounded-[10px] shrink-0 bg-bg-glass backdrop-blur-[20px]"
-        >
-          <WindowControls bare />
-        </motion.div>
+        {onSearchToggle && !window.linerElectron ? (
+          <button
+            type="button"
+            onClick={onSearchToggle}
+            aria-label="Search music"
+            className="sm:hidden flex h-[38px] w-[38px] items-center justify-center rounded-[10px] border-0 bg-bg-glass text-text-primary active:scale-95"
+          >
+            <Search3Line size={20} />
+          </button>
+        ) : null}
+        {window.linerElectron ? (
+          <motion.div
+            layoutId={WINDOW_CONTROLS_LAYOUT_ID}
+            transition={WINDOW_CONTROLS_MORPH}
+            data-no-window-drag
+            data-no-tooltip="true"
+            className="h-[38px] flex items-center gap-[2px] px-[4px] rounded-[10px] shrink-0 bg-bg-glass backdrop-blur-[20px]"
+          >
+            <WindowControls bare />
+          </motion.div>
+        ) : null}
       </div>
     </header>
   );

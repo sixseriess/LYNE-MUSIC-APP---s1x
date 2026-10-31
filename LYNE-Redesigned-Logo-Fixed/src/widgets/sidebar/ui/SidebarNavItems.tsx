@@ -60,6 +60,7 @@ export function SidebarNavItems({
                 <button
                   type="button"
                   aria-pressed={searchOpen}
+                  aria-label={tooltipLabel}
                   onClick={onSearchToggle}
                   className="group relative inline-flex items-center justify-center bg-transparent border-0 p-0 cursor-pointer active:scale-[0.96] transition-transform duration-100"
                 >
@@ -88,6 +89,7 @@ export function SidebarNavItems({
                 key={item.id}
                 to={item.href!}
                 aria-current={active ? "page" : undefined}
+                aria-label={tooltipLabel}
                 onPointerDown={(event) => {
                   if (event.button === 0) setPendingHref(item.href!);
                 }}

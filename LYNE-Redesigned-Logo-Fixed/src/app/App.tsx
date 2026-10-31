@@ -19,6 +19,7 @@ import { useDiscordSync } from "@/features/discord";
 import { AppRoutes } from "./routes";
 import DeeplinkHandler from "./DeeplinkHandler";
 import EnvironmentWarning from "./EnvironmentWarning";
+import PwaInstallPrompt from "./PwaInstallPrompt";
 import { ConnectionIssueModal } from "@/features/connectivity";
 import { useThemeCustomizationSync } from "@/features/settings";
 import "./globals.css";
@@ -66,6 +67,7 @@ export default function App() {
         disableTransitionOnChange
       >
         <GlobalTooltip />
+        <PwaInstallPrompt />
         <ThemeSync />
         <AppIconSync />
         <PresenceSync />
