@@ -7,3 +7,4 @@ export { OverlayTab } from "./OverlayTab";
 export { DiscordTab } from "./DiscordTab";
 export { YoutubeTab } from "./YoutubeTab";
 export { ListeningStatsTab } from "./ListeningStatsTab";
+export { ProfileTab } from "./ProfileTab";
