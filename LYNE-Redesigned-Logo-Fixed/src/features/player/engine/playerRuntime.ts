@@ -304,6 +304,7 @@ export class PlayerRuntime {
           // Ignore long gaps caused by sleep, suspension, or buffering.
           if (elapsed > 0 && elapsed <= 2000) {
             useListeningStatsStore.getState().addListeningTime(elapsed, now);
+            useListeningStatsStore.getState().addTrackListeningTime(playerState.currentTrack, elapsed, now);
           }
         }
         this.listeningStatsLastTickAt = now;
