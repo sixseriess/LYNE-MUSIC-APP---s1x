@@ -1,6 +1,6 @@
 {
   "name": "@lyne/client",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "type": "module",
   "private": true,
   "description": "LYNE Music Player",
