@@ -76,7 +76,7 @@ export function getListeningTotalMs(
 function getArtistCredits(song: ListeningTrackSummary) {
   if (song.artistList?.length) return song.artistList;
   return song.artists
-    .split(/\\s*(?:,|feat\\.?|ft\\.?)\\s*/i)
+    .split(/\s*(?:,|feat\.?|ft\.?)\s*/i)
     .map((name) => ({ name: name.trim() }));
 }
 
