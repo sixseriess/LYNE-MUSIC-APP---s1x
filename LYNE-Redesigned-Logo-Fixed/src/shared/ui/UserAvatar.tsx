@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FaUser } from "react-icons/fa";
+import { useLocalProfilePicture } from "@/shared/utils/localImageOverrides";
 
 export interface UserAvatarProps {
   user?: {
+    id?: string | null;
     avatarUrl?: string | null;
     displayName?: string | null;
     username?: string | null;
@@ -20,6 +22,12 @@ export function UserAvatar({
   style,
 }: UserAvatarProps) {
   const [imgError, setImgError] = useState(false);
+  const localAvatarUrl = useLocalProfilePicture(user?.id ?? null);
+  const imageUrl = localAvatarUrl || user?.avatarUrl || null;
+
+  useEffect(() => {
+    setImgError(false);
+  }, [imageUrl]);
 
   const initial = useMemo(() => {
     if (!user) return "";
@@ -31,7 +39,7 @@ export function UserAvatar({
     return name ? name[0].toUpperCase() : "";
   }, [user]);
 
-  const hasImage = Boolean(user?.avatarUrl && !imgError);
+  const hasImage = Boolean(imageUrl && !imgError);
 
   return (
     <div
@@ -40,7 +48,7 @@ export function UserAvatar({
     >
       {hasImage ? (
         <img
-          src={user!.avatarUrl!}
+          src={imageUrl!}
           alt={user?.displayName || user?.username || "Avatar"}
           className="w-full h-full object-cover"
           onError={() => setImgError(true)}

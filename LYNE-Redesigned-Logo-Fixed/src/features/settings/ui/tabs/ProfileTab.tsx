@@ -1,45 +1,46 @@
-import { useEffect, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { UserAvatar } from "@/shared/ui/UserAvatar";
+import {
+  clearLocalProfilePicture,
+  setLocalProfilePicture,
+  useLocalProfilePicture,
+} from "@/shared/utils/localImageOverrides";
+import { imageFileToDataUrl } from "@/shared/utils/imageFile";
 
 export function ProfileTab() {
   const user = useAuthStore((state) => state.user);
-  const updateProfile = useAuthStore((state) => state.updateProfile);
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? "");
+  const accountId = user?.id ?? null;
+  const localAvatarUrl = useLocalProfilePicture(accountId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setAvatarUrl(user?.avatarUrl ?? "");
-  }, [user?.avatarUrl]);
-
-  const saveAvatar = async () => {
-    const value = avatarUrl.trim();
-    if (value) {
-      try {
-        const parsed = new URL(value);
-        if (parsed.protocol !== "https:" || parsed.username || parsed.password) {
-          throw new Error("Use a public HTTPS image link.");
-        }
-      } catch {
-        setError("Enter a valid public HTTPS image link.");
-        setMessage(null);
-        return;
-      }
-    }
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
 
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await updateProfile({ avatarUrl: value || null });
-      setMessage(value ? "Your account picture has been updated." : "Your account picture has been removed.");
+      const image = await imageFileToDataUrl(file, 512);
+      setLocalProfilePicture(accountId, image);
+      setMessage("Your picture has been saved on this device.");
     } catch {
-      setError("LYNE couldn't save your account picture. Please try again.");
+      setError("Couldn't save that picture. Choose a supported image under 15 MB.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRemove = () => {
+    clearLocalProfilePicture(accountId);
+    setError(null);
+    setMessage("Your custom picture has been removed.");
   };
 
   return (
@@ -61,66 +62,41 @@ export function ProfileTab() {
           <div className="flex flex-col gap-[5px]">
             <h3 className="m-0 text-[14px] font-[650] text-text-primary">Account picture</h3>
             <p className="m-0 text-[12px] leading-[18px] text-text-tertiary">
-              Add a public HTTPS image link. LYNE saves the link to your account, so your picture follows you when you sign in on another device.
+              Choose an image from your device. LYNE saves it locally and uses it anywhere your account avatar appears. It does not sync to other devices and may be lost if app data is removed or LYNE is reinstalled.
             </p>
           </div>
 
-          <label htmlFor="lyne-profile-avatar-url" className="text-[12px] font-[600] text-text-secondary">
-            Image URL
-          </label>
           <input
-            id="lyne-profile-avatar-url"
-            type="url"
-            inputMode="url"
-            autoComplete="url"
-            spellCheck={false}
-            value={avatarUrl}
-            onChange={(event) => {
-              setAvatarUrl(event.target.value);
-              setError(null);
-              setMessage(null);
-            }}
-            placeholder="https://example.com/your-picture.png"
-            disabled={!user || saving}
-            className="h-[42px] w-full rounded-[10px] border border-border-alpha-12 bg-bg-surface px-[12px] text-[13px] text-text-primary outline-none transition-colors placeholder:text-text-tertiary focus:border-[#a78bfa]/70 disabled:opacity-50"
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+            className="hidden"
+            onChange={(event) => void handleFileChange(event)}
           />
 
-          {!user && (
-            <p className="m-0 text-[12px] text-text-tertiary">
-              Sign in to a LYNE account to customize its picture.
-            </p>
-          )}
           {error && <p role="alert" className="m-0 text-[12px] text-red-400">{error}</p>}
           {message && <p role="status" className="m-0 text-[12px] text-emerald-400">{message}</p>}
 
           <div className="flex flex-wrap items-center gap-[9px]">
             <button
               type="button"
-              onClick={saveAvatar}
-              disabled={!user || saving || avatarUrl.trim() === (user?.avatarUrl ?? "")}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={saving}
               className="inline-flex h-[38px] items-center justify-center rounded-[10px] bg-[#a78bfa] px-[15px] text-[12px] font-[700] text-[#171326] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save picture"}
+              {saving ? "Saving..." : localAvatarUrl ? "Change picture" : "Choose picture"}
             </button>
             <button
               type="button"
-              onClick={() => {
-                setAvatarUrl("");
-                setError(null);
-                setMessage(null);
-              }}
-              disabled={!user || saving || (!user?.avatarUrl && !avatarUrl.trim())}
+              onClick={handleRemove}
+              disabled={saving || !localAvatarUrl}
               className="inline-flex h-[38px] items-center justify-center rounded-[10px] border border-border-alpha-12 bg-transparent px-[14px] text-[12px] font-[600] text-text-secondary transition-colors hover:bg-bg-surface disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Clear
+              Remove picture
             </button>
           </div>
         </div>
       </section>
-
-      <p className="m-0 px-[2px] text-[11px] leading-[17px] text-text-tertiary">
-        Use a direct image link that can be viewed publicly. LYNE does not upload or host image files in this setting.
-      </p>
     </div>
   );
 }

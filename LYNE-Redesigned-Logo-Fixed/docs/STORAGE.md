@@ -63,6 +63,10 @@ Settings and small state, as zustand `persist` stores or plain keys.
 `liner_auth_session` and `liner_youtube_tv_session` are legacy keys. They are moved
 into the encrypted files above on first launch and then removed.
 
+Custom image overrides are kept in `liner_profile_picture_v1:<account-id>` and
+`liner_custom_playlist_covers_v1`. They are local to this install, are not synced
+to an account, and can be lost when app data is removed or LYNE is reinstalled.
+
 ## Other Chromium storage
 
 - **CacheStorage** and the service worker folder hold cover images.

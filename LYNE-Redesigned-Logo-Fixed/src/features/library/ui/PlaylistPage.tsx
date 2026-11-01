@@ -9,6 +9,7 @@ import {
   useState,
   memo,
   Suspense,
+  type ChangeEvent,
 } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import PlaylistPageSkeleton from "./PlaylistPageSkeleton";
@@ -42,7 +43,7 @@ import {
   DownloadLine,
 } from "@mingcute/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuPencil, LuTrash2, LuText, LuShuffle } from "react-icons/lu";
+import { LuPencil, LuTrash2, LuText, LuShuffle, LuImage } from "react-icons/lu";
 import { buildShareUrl } from "@/shared/utils/share";
 import Button from "@/shared/ui/Button";
 import DropdownMenu from "@/shared/ui/DropdownMenu";
@@ -60,6 +61,11 @@ import { statusOf } from "@/features/connectivity";
 import { useListReorder } from "@/shared/hooks";
 import { playerEngine } from "@/features/player";
 import type { Track } from "@/shared/types";
+import { imageFileToDataUrl } from "@/shared/utils/imageFile";
+import {
+  setLocalPlaylistCover,
+  useLocalPlaylistCover,
+} from "@/shared/utils/localImageOverrides";
 import { useTranslation } from "@/languages";
 import { api } from "@/shared/api";
 import {
@@ -198,6 +204,9 @@ function LibraryPlaylistContent() {
   const currentUser = useAuthStore((state) => state.user);
   const likesOwnerName = userDisplayName(currentUser);
   const decodedId = id ? decodeURIComponent(id) : null;
+  const localPlaylistCover = useLocalPlaylistCover(
+    isLikesMode ? null : decodedId,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
 
@@ -250,10 +259,11 @@ function LibraryPlaylistContent() {
       title: playlistDetail.title || t("playlist.untitled_playlist"),
       bio,
       countLabel: t("common.tracks", { count: playlistDetail.trackCount }),
-      coverUrl: playlistDetail.coverUrl || "",
-      coverUrls:
-        playlistDetail.coverUrls ??
-        (playlistDetail.coverUrl ? [playlistDetail.coverUrl] : []),
+      coverUrl: localPlaylistCover || playlistDetail.coverUrl || "",
+      coverUrls: localPlaylistCover
+        ? [localPlaylistCover]
+        : playlistDetail.coverUrls ??
+          (playlistDetail.coverUrl ? [playlistDetail.coverUrl] : []),
       tracks: playlistDetail.tracks,
       durationMs: playlistDetail.durationMs,
       revision: playlistDetail.revision,
@@ -275,8 +285,9 @@ function LibraryPlaylistContent() {
       ? {
           title: summary.title || t("playlist.untitled_playlist"),
           subtitle: summary.description?.trim() || undefined,
-          coverUrls:
-            summary.coverUrls?.length > 0
+          coverUrls: localPlaylistCover
+            ? [localPlaylistCover]
+            : summary.coverUrls?.length > 0
               ? summary.coverUrls
               : summary.coverUrl
                 ? [summary.coverUrl]
@@ -379,6 +390,28 @@ function LibraryPlaylistContent() {
   const { toast } = useToast();
   const [addedToQueue, setAddedToQueue] = useState(false);
   const [addSongsOpen, setAddSongsOpen] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePlaylistCoverFileChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file || !decodedId) return;
+
+    try {
+      const image = await imageFileToDataUrl(file, 1024);
+      setLocalPlaylistCover(decodedId, image);
+      toast("Playlist cover updated", "checkmark", {
+        description: viewData?.title || undefined,
+      });
+    } catch {
+      toast("Couldn't save that cover image", "error", {
+        description: "Choose a valid image under 15 MB.",
+      });
+    }
+  };
 
   const handleAddToQueue = useCallback(() => {
     if (!sortedTracks.length || !viewData) return;
@@ -587,6 +620,13 @@ function LibraryPlaylistContent() {
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-transparent">
+      <input
+        ref={coverInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+        className="hidden"
+        onChange={(event) => void handlePlaylistCoverFileChange(event)}
+      />
       <div className="relative z-1 grid grid-cols-1 w-full h-full min-h-0 overflow-hidden">
         {viewData && (
           <div
@@ -868,6 +908,28 @@ function LibraryPlaylistContent() {
                             </Button>
                           }
                           items={[
+                            {
+                              id: "custom-cover",
+                              icon: <LuImage size={15} />,
+                              label: localPlaylistCover
+                                ? "Change cover image"
+                                : "Set cover image",
+                              onClick: () => coverInputRef.current?.click(),
+                            },
+                            ...(localPlaylistCover
+                              ? [
+                                  {
+                                    id: "remove-custom-cover",
+                                    icon: <LuTrash2 size={15} />,
+                                    label: "Remove custom cover",
+                                    onClick: () => {
+                                      if (!decodedId) return;
+                                      setLocalPlaylistCover(decodedId, null);
+                                      toast("Custom playlist cover removed", "info");
+                                    },
+                                  },
+                                ]
+                              : []),
                             {
                               id: "rename",
                               icon: <LuPencil size={15} />,

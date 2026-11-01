@@ -13,6 +13,7 @@ import type {
   LibraryViewMode,
 } from "../types";
 import { useTranslation } from "@/languages";
+import { useLocalPlaylistCover } from "@/shared/utils/localImageOverrides";
 import { useModalStore } from "../store/modalStore";
 import { LuTrash2 } from "react-icons/lu";
 import { More2Fill, PlaylistFill, AddLine, Search3Fill } from "@mingcute/react";
@@ -141,18 +142,24 @@ function useItemMenuItems(item: LibraryItemViewModel): DropdownMenuItem[] {
 }
 
 function LibraryItemCard({ item }: { item: LibraryItemViewModel }) {
-  const menuItems = useItemMenuItems(item);
-  const link = collectionLink(item);
+  const localCover = useLocalPlaylistCover(
+    item.kind === "playlist" ? item.id : null,
+  );
+  const displayItem = localCover
+    ? { ...item, imageUrl: localCover, coverUrls: [localCover] }
+    : item;
+  const menuItems = useItemMenuItems(displayItem);
+  const link = collectionLink(displayItem);
 
-  if (item.kind === "album") {
+  if (displayItem.kind === "album") {
     return (
       <AlbumCard
-        id={item.id}
-        title={item.title}
-        coverUrl={item.imageUrl}
-        trackCount={item.trackCount}
-        subtitle={item.source ? item.subtitle : undefined}
-        badge={<SourceBadge source={item.source} />}
+        id={displayItem.id}
+        title={displayItem.title}
+        coverUrl={displayItem.imageUrl}
+        trackCount={displayItem.trackCount}
+        subtitle={displayItem.source ? displayItem.subtitle : undefined}
+        badge={<SourceBadge source={displayItem.source} />}
         menuItems={menuItems}
       />
     );
@@ -160,23 +167,27 @@ function LibraryItemCard({ item }: { item: LibraryItemViewModel }) {
 
   return (
     <PlaylistCard
-      title={item.title}
-      author={item.subtitle}
-      imageUrl={item.imageUrl}
-      coverUrls={item.coverUrls}
-      variant={item.kind === "artist" ? "artist" : "playlist"}
-      href={item.href}
+      title={displayItem.title}
+      author={displayItem.subtitle}
+      imageUrl={displayItem.imageUrl}
+      coverUrls={displayItem.coverUrls}
+      variant={displayItem.kind === "artist" ? "artist" : "playlist"}
+      href={displayItem.href}
       linkState={link.state}
       onPointerDown={link.prefetch}
-      badge={<SourceBadge source={item.source} />}
+      badge={<SourceBadge source={displayItem.source} />}
       menuItems={menuItems}
     />
   );
 }
 
 function LibraryItemRow({ item }: { item: LibraryItemViewModel }) {
-  const menuItems = useItemMenuItems(item);
-  const link = collectionLink(item);
+  const localCover = useLocalPlaylistCover(
+    item.kind === "playlist" ? item.id : null,
+  );
+  const displayItem = localCover ? { ...item, imageUrl: localCover } : item;
+  const menuItems = useItemMenuItems(displayItem);
+  const link = collectionLink(displayItem);
   const navigate = useStableNavigate();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -200,19 +211,19 @@ function LibraryItemRow({ item }: { item: LibraryItemViewModel }) {
     <div
       onContextMenu={handleContextMenu}
       onPointerDown={link.prefetch}
-      onClick={() => navigate(item.href, link.state)}
+      onClick={() => navigate(displayItem.href, link.state)}
       className="w-full flex items-center justify-between rounded-md p-[8px] outline-none transition-colors duration-150 ease-out cursor-pointer hover:bg-border-alpha-14 select-none"
     >
       <div className="flex items-center gap-[16px] min-w-0">
         <div
           className={`relative h-[48px] w-[48px] shrink-0 overflow-hidden bg-border-alpha-14 ${
-            item.kind === "artist" ? "rounded-full" : "rounded-md"
+            displayItem.kind === "artist" ? "rounded-full" : "rounded-md"
           }`}
         >
-          {item.imageUrl ? (
+          {displayItem.imageUrl ? (
             <CoverImage
-              src={item.imageUrl}
-              alt={item.title}
+              src={displayItem.imageUrl}
+              alt={displayItem.title}
               fill
               sizes="48px"
               placeholder="blur"
@@ -232,9 +243,9 @@ function LibraryItemRow({ item }: { item: LibraryItemViewModel }) {
             style={{
               fontWeight: 400,
             }}
-            title={item.title}
+            title={displayItem.title}
           >
-            {item.title}
+            {displayItem.title}
           </h3>
           <p
             className="m-0 flex min-w-0 items-center text-[15px] leading-[1.2] overflow-hidden text-text-secondary"
@@ -243,24 +254,24 @@ function LibraryItemRow({ item }: { item: LibraryItemViewModel }) {
             }}
           >
             <span className="flex min-w-0 items-center gap-[6px]">
-              <SourceBadge source={item.source} size="md" />
-              <span className="truncate">{item.subtitle}</span>
+              <SourceBadge source={displayItem.source} size="md" />
+              <span className="truncate">{displayItem.subtitle}</span>
             </span>
           </p>
         </div>
       </div>
 
       <div className="flex items-center shrink-0 ml-[16px] gap-[16px]">
-        {item.trackCount !== undefined && (
+        {displayItem.trackCount !== undefined && (
           <span
             className="text-[14px] text-text-tertiary"
             style={{
               fontWeight: 400,
             }}
           >
-            {item.trackCount === 1
+            {displayItem.trackCount === 1
               ? `1 ${t("library.track")}`
-              : `${item.trackCount.toLocaleString()} ${t("library.tracks")}`}
+              : `${displayItem.trackCount.toLocaleString()} ${t("library.tracks")}`}
           </span>
         )}
 
