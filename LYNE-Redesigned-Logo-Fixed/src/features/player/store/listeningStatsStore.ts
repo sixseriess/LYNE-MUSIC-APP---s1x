@@ -93,7 +93,7 @@ function rankListeningTracks(
     for (const artist of getArtistCredits(song)) {
       const name = artist.name?.trim();
       if (!name) continue;
-      const id = artist.id || name.toLocaleLowerCase();
+      const id = ("id" in artist && artist.id) || name.toLocaleLowerCase();
       if (creditedArtists.has(id)) continue;
       creditedArtists.add(id);
 
