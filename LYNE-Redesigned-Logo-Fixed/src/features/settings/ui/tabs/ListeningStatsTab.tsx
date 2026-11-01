@@ -28,6 +28,8 @@ function formatMinutes(milliseconds: number) {
 
 export function ListeningStatsTab() {
   const [period, setPeriod] = useState<ListeningPeriod>("week");
+  const [isExportingStats, setIsExportingStats] = useState(false);
+  const [statsExportError, setStatsExportError] = useState<string | null>(null);
   const listenedMsByDay = useListeningStatsStore((state) => state.listenedMsByDay);
   const trackListeningByDay = useListeningStatsStore((state) => state.trackListeningByDay);
   const totalMinutes = useMemo(
@@ -43,6 +45,169 @@ export function ListeningStatsTab() {
     () => getYearlyWrapped(listenedMsByDay, trackListeningByDay, wrappedYear),
     [listenedMsByDay, trackListeningByDay, wrappedYear],
   );
+
+  const handleShareStats = async () => {
+    setIsExportingStats(true);
+    setStatsExportError(null);
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas is unavailable.");
+
+      const ctx = context;
+      const background = ctx.createLinearGradient(0, 0, 1080, 1350);
+      background.addColorStop(0, "#101018");
+      background.addColorStop(0.52, "#1b1730");
+      background.addColorStop(1, "#0d1018");
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const glow = ctx.createRadialGradient(920, 110, 20, 920, 110, 560);
+      glow.addColorStop(0, "rgba(167, 139, 250, 0.34)");
+      glow.addColorStop(1, "rgba(167, 139, 250, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, canvas.width, 700);
+
+      const roundedPanel = (x: number, y: number, width: number, height: number) => {
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, 28);
+        ctx.fill();
+      };
+      const fittedText = (value: string, maxWidth: number) => {
+        let result = value;
+        while (result.length > 3 && ctx.measureText(result).width > maxWidth) {
+          result = result.slice(0, -2) + "…";
+        }
+        return result;
+      };
+
+      const selectedPeriodLabel =
+        PERIOD_OPTIONS.find((option) => option.value === period)?.label ?? "Your stats";
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 48px Arial, sans-serif";
+      ctx.fillText("LYNE", 72, 112);
+      ctx.fillStyle = "rgba(255,255,255,0.58)";
+      ctx.font = "600 17px Arial, sans-serif";
+      ctx.fillText("YOUR LISTENING SNAPSHOT", 75, 153);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "750 64px Arial, sans-serif";
+      ctx.fillText(selectedPeriodLabel, 72, 267);
+      ctx.fillStyle = "rgba(255,255,255,0.62)";
+      ctx.font = "400 23px Arial, sans-serif";
+      ctx.fillText(PERIOD_DESCRIPTIONS[period], 76, 315, 900);
+
+      ctx.fillStyle = "rgba(255,255,255,0.075)";
+      roundedPanel(64, 365, 952, 238);
+      ctx.fillStyle = "rgba(255,255,255,0.58)";
+      ctx.font = "650 19px Arial, sans-serif";
+      ctx.fillText("TOTAL MINUTES LISTENED", 100, 424);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 100px Arial, sans-serif";
+      ctx.fillText(totalMinutes.toLocaleString(), 94, 536);
+      ctx.fillStyle = "rgba(255,255,255,0.65)";
+      ctx.font = "500 25px Arial, sans-serif";
+      ctx.fillText("minutes", 102, 574);
+
+      const drawListCard = (
+        x: number,
+        title: string,
+        rows: { title: string; subtitle?: string; listenedMs: number }[],
+        emptyMessage: string,
+      ) => {
+        ctx.fillStyle = "rgba(255,255,255,0.065)";
+        roundedPanel(x, 642, 460, 560);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 27px Arial, sans-serif";
+        ctx.fillText(title, x + 30, 702);
+        ctx.fillStyle = "rgba(255,255,255,0.48)";
+        ctx.font = "600 13px Arial, sans-serif";
+        ctx.fillText("MOST LISTENED", x + 32, 734);
+
+        if (!rows.length) {
+          ctx.fillStyle = "rgba(255,255,255,0.56)";
+          ctx.font = "400 19px Arial, sans-serif";
+          ctx.fillText(emptyMessage, x + 30, 808, 390);
+          return;
+        }
+
+        rows.slice(0, 5).forEach((row, index) => {
+          const rowY = 790 + index * 76;
+          ctx.fillStyle = "rgba(255,255,255,0.10)";
+          roundedPanel(x + 26, rowY - 31, 42, 42);
+          ctx.fillStyle = "rgba(255,255,255,0.82)";
+          ctx.font = "700 17px Arial, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(String(index + 1), x + 47, rowY - 3);
+          ctx.textAlign = "left";
+
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "650 18px Arial, sans-serif";
+          ctx.fillText(fittedText(row.title, 250), x + 84, rowY - 7);
+          if (row.subtitle) {
+            ctx.fillStyle = "rgba(255,255,255,0.52)";
+            ctx.font = "400 14px Arial, sans-serif";
+            ctx.fillText(fittedText(row.subtitle, 250), x + 84, rowY + 17);
+          }
+
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = "600 15px Arial, sans-serif";
+          ctx.textAlign = "right";
+          ctx.fillText(`${formatMinutes(row.listenedMs)}m`, x + 425, rowY - 3);
+          ctx.textAlign = "left";
+        });
+      };
+
+      drawListCard(
+        64,
+        "Top songs",
+        rankings.topSongs.map((song) => ({
+          title: song.title,
+          subtitle: song.artists,
+          listenedMs: song.listenedMs,
+        })),
+        "Your top songs will appear here as you listen.",
+      );
+      drawListCard(
+        556,
+        "Top artists",
+        rankings.topArtists.map((artist) => ({
+          title: artist.name,
+          listenedMs: artist.listenedMs,
+        })),
+        "Your top artists will appear here as you listen.",
+      );
+
+      ctx.fillStyle = "rgba(255,255,255,0.48)";
+      ctx.font = "500 15px Arial, sans-serif";
+      ctx.fillText("Made with LYNE  •  Listening data recorded on this device", 72, 1280);
+      ctx.textAlign = "right";
+      ctx.fillText(new Date().toLocaleDateString(), 1008, 1280);
+      ctx.textAlign = "left";
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/png");
+      });
+      if (!blob) throw new Error("LYNE couldn't create the stats image.");
+
+      const imageUrl = URL.createObjectURL(blob);
+      const download = document.createElement("a");
+      download.href = imageUrl;
+      download.download = `lyne-${period}-stats.png`;
+      document.body.appendChild(download);
+      download.click();
+      download.remove();
+      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 1500);
+    } catch {
+      setStatsExportError("Couldn't create the image. Please try again.");
+    } finally {
+      setIsExportingStats(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-[18px]">
@@ -138,6 +303,30 @@ export function ListeningStatsTab() {
             )}
           </div>
         </div>
+      </section>
+
+
+      <section className="flex flex-col gap-[12px] rounded-[16px] border border-border-alpha-8 bg-bg-elevated p-[16px]">
+        <div className="flex flex-col gap-[5px]">
+          <h3 className="m-0 text-[14px] font-[650] text-text-primary">Share Your Stats</h3>
+          <p className="m-0 text-[12px] leading-[18px] text-text-tertiary">
+            Export your {PERIOD_OPTIONS.find((option) => option.value === period)?.label.toLowerCase()} listening stats as a LYNE image.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-[10px]">
+          <button
+            type="button"
+            onClick={handleShareStats}
+            disabled={isExportingStats}
+            className="inline-flex h-[38px] items-center justify-center rounded-[10px] bg-[#a78bfa] px-[15px] text-[12px] font-[700] text-[#171326] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-55"
+          >
+            {isExportingStats ? "Preparing image..." : "Download stats image"}
+          </button>
+          <span className="text-[11px] text-text-tertiary">PNG · ready to post or send</span>
+        </div>
+        {statsExportError && (
+          <p role="alert" className="m-0 text-[11px] text-red-400">{statsExportError}</p>
+        )}
       </section>
 
       <section className="overflow-hidden rounded-[16px] border border-border-alpha-8 bg-bg-elevated">
