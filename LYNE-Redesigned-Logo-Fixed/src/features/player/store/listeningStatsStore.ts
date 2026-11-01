@@ -21,6 +21,11 @@ export interface YearlyWrapped {
   topArtists: { id: string; name: string; listenedMs: number }[];
 }
 
+export interface ListeningRankings {
+  topSongs: ListeningTrackSummary[];
+  topArtists: { id: string; name: string; listenedMs: number }[];
+}
+
 export interface ListeningStatsState {
   /** Total milliseconds listened, keyed by the listener's local calendar date. */
   listenedMsByDay: Record<string, number>;
@@ -37,11 +42,7 @@ export function localDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function getListeningTotalMs(
-  listenedMsByDay: Record<string, number>,
-  period: ListeningPeriod,
-  now = new Date(),
-): number {
+function getPeriodDateRange(period: ListeningPeriod, now = new Date()) {
   const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const start = new Date(end);
 
@@ -53,13 +54,91 @@ export function getListeningTotalMs(
     start.setMonth(0, 1);
   }
 
+  return { start: localDateKey(start), end: localDateKey(end) };
+}
+
+export function getListeningTotalMs(
+  listenedMsByDay: Record<string, number>,
+  period: ListeningPeriod,
+  now = new Date(),
+): number {
+  const { start, end } = getPeriodDateRange(period, now);
   let total = 0;
+
   for (const [date, milliseconds] of Object.entries(listenedMsByDay)) {
-    if (date >= localDateKey(start) && date <= localDateKey(end)) {
+    if (date >= start && date <= end) {
       total += Number.isFinite(milliseconds) ? Math.max(0, milliseconds) : 0;
     }
   }
   return total;
+}
+
+function getArtistCredits(song: ListeningTrackSummary) {
+  if (song.artistList?.length) return song.artistList;
+  return song.artists
+    .split(/\\s*(?:,|feat\\.?|ft\\.?)\\s*/i)
+    .map((name) => ({ name: name.trim() }));
+}
+
+function rankListeningTracks(
+  songs: Map<string, ListeningTrackSummary>,
+): ListeningRankings {
+  const topSongs = [...songs.values()]
+    .sort((a, b) => b.listenedMs - a.listenedMs)
+    .slice(0, 10);
+  const artists = new Map<string, { id: string; name: string; listenedMs: number }>();
+
+  for (const song of songs.values()) {
+    const creditedArtists = new Set<string>();
+    for (const artist of getArtistCredits(song)) {
+      const name = artist.name?.trim();
+      if (!name) continue;
+      const id = artist.id || name.toLocaleLowerCase();
+      if (creditedArtists.has(id)) continue;
+      creditedArtists.add(id);
+
+      const current = artists.get(id);
+      if (current) current.listenedMs += song.listenedMs;
+      else artists.set(id, { id, name, listenedMs: song.listenedMs });
+    }
+  }
+
+  return {
+    topSongs,
+    topArtists: [...artists.values()]
+      .sort((a, b) => b.listenedMs - a.listenedMs)
+      .slice(0, 10),
+  };
+}
+
+export function getListeningRankings(
+  trackListeningByDay: Record<string, Record<string, ListeningTrackSummary>>,
+  period: ListeningPeriod,
+  now = new Date(),
+): ListeningRankings {
+  const { start, end } = getPeriodDateRange(period, now);
+  const songs = new Map<string, ListeningTrackSummary>();
+
+  for (const [date, tracks] of Object.entries(trackListeningByDay)) {
+    if (date < start || date > end) continue;
+
+    for (const track of Object.values(tracks)) {
+      if (!track?.id || !Number.isFinite(track.listenedMs)) continue;
+      const listenedMs = Math.max(0, track.listenedMs);
+      const current = songs.get(track.id);
+      if (current) {
+        current.listenedMs += listenedMs;
+      } else {
+        songs.set(track.id, {
+          ...track,
+          artistList: [...(track.artistList ?? [])],
+          listenedMs,
+        });
+      }
+    }
+  }
+
+  return rankListeningTracks(songs);
 }
 
 export function getYearlyWrapped(
@@ -82,34 +161,16 @@ export function getYearlyWrapped(
     for (const track of Object.values(tracks)) {
       const current = songs.get(track.id);
       if (current) current.listenedMs += Math.max(0, track.listenedMs);
-      else songs.set(track.id, { ...track, artistList: [...track.artistList] });
+      else songs.set(track.id, { ...track, artistList: [...(track.artistList ?? [])] });
     }
   }
 
-  const topSongs = [...songs.values()]
-    .sort((a, b) => b.listenedMs - a.listenedMs)
-    .slice(0, 10);
-  const artists = new Map<string, { id: string; name: string; listenedMs: number }>();
-
-  for (const song of songs.values()) {
-    const credits = song.artistList.length
-      ? song.artistList
-      : song.artists.split(/,| feat\\.? | ft\\.? /i).map((name) => ({ name: name.trim() }));
-    for (const artist of credits) {
-      const name = artist.name?.trim();
-      if (!name) continue;
-      const id = artist.id || name.toLocaleLowerCase();
-      const current = artists.get(id);
-      if (current) current.listenedMs += song.listenedMs;
-      else artists.set(id, { id, name, listenedMs: song.listenedMs });
-    }
-  }
-
+  const rankings = rankListeningTracks(songs);
   return {
     year,
     totalMs,
-    topSongs,
-    topArtists: [...artists.values()].sort((a, b) => b.listenedMs - a.listenedMs).slice(0, 10),
+    topSongs: rankings.topSongs,
+    topArtists: rankings.topArtists,
   };
 }
 
