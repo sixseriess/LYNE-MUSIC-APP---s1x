@@ -29,10 +29,12 @@ import {
   DiscordTab,
   YoutubeTab,
   ListeningStatsTab,
+  ProfileTab,
 } from "./tabs";
 import { SettingsSidebar, type SettingsNavIconProps } from "./SettingsSidebar";
 
 type TabId =
+  | "Profile"
   | "Playback"
   | "Listening"
   | "Shortcuts"
@@ -44,6 +46,7 @@ type TabId =
   | "About";
 
 const TAB_ICONS: Record<TabId, React.ComponentType<SettingsNavIconProps>> = {
+  Profile: InfoCircle,
   Playback: Play,
   Listening: MusicLine,
   Shortcuts: KeyboardFill,
@@ -61,10 +64,11 @@ const TAB_GROUPS: { labelKey: TabGroupKey; ids: TabId[] }[] = [
   { labelKey: "player", ids: ["Playback", "Listening", "Shortcuts"] },
   { labelKey: "interface", ids: ["Appearance", "Overlay"] },
   { labelKey: "integrations", ids: ["Youtube", "Discord"] },
-  { labelKey: "application", ids: ["Storage", "About"] },
+  { labelKey: "application", ids: ["Profile", "Storage", "About"] },
 ];
 
 const SETTING_ITEMS: { tabId: TabId; titleKey: string; descKey?: string }[] = [
+  { tabId: "Profile", titleKey: "Profile", descKey: "Change your LYNE account picture" },
   { tabId: "Listening", titleKey: "Total Minutes Listened", descKey: "Track your music listening time in LYNE" },
   // Playback
   { tabId: "Playback", titleKey: "Master volume", descKey: "Set the overall playback volume" },
@@ -262,6 +266,7 @@ export default function SettingsModal() {
   };
 
   const tabLabels: Record<TabId, string> = {
+    Profile: "Profile",
     Playback: t("settings.tabs.playback"),
     Listening: "Total Minutes Listened",
     Shortcuts: t("settings.tabs.shortcuts") || "Shortcuts",
@@ -274,6 +279,7 @@ export default function SettingsModal() {
   };
 
   const tabDescriptions: Record<TabId, string> = {
+    Profile: "Customize the picture shown on your LYNE account.",
     Playback: t("settings.playback.description"),
     Listening: "See how long you have listened to music on LYNE.",
     Shortcuts:
@@ -299,6 +305,7 @@ export default function SettingsModal() {
     const set = new Set<TabId>();
 
     const TAB_LABEL_KEYS: Record<TabId, string> = {
+      Profile: "Profile",
       Playback: "settings.tabs.playback",
       Listening: "Total Minutes Listened",
       Shortcuts: "settings.tabs.shortcuts",
@@ -311,6 +318,7 @@ export default function SettingsModal() {
     };
 
     const TAB_DESC_KEYS: Record<TabId, string> = {
+      Profile: "Change your LYNE account picture",
       Playback: "settings.playback.description",
       Listening: "Track your music listening time in LYNE",
       Shortcuts: "settings.shortcuts.description",
@@ -425,6 +433,7 @@ export default function SettingsModal() {
               transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
               className="flex-1 flex flex-col"
             >
+              {activeTab === "Profile" && <ProfileTab />}
               {activeTab === "Playback" && (
                 <PlaybackTab searchQuery={searchQuery} />
               )}
