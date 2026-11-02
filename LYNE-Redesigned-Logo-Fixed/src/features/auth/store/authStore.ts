@@ -211,7 +211,14 @@ useAuthStore.subscribe((state, previous) => {
 
 export function getAuthErrorCode(error: unknown): string {
   if (error instanceof HumanCheckCancelledError) return "human_check_cancelled";
-  if (!(error instanceof ApiError)) return "server_unavailable";
+  if (!(error instanceof ApiError)) {
+    const status = typeof error === "object" && error !== null && "status" in error
+      ? Number((error as { status?: unknown }).status)
+      : 0;
+    if (status >= 500) return "server_error";
+    if (status >= 400) return "unknown_error";
+    return "server_unavailable";
+  }
   if (error.status === 0) return "server_unavailable";
   // 5xx and cloudflare 52x: the server is down, not the user's input or connection
   if (error.status >= 500) return "server_error";
@@ -225,7 +232,28 @@ export function getAuthErrorCode(error: unknown): string {
 }
 
 export function authErrorMessage(error: unknown): string {
-  if (!(error instanceof ApiError)) return "Unable to reach the server.";
+  if (!(error instanceof ApiError)) {
+    if (error instanceof Error && error.message) {
+      const message = error.message.toLowerCase();
+      if (message.includes("invalid api key") || message.includes("invalid jwt")) {
+        return "The mobile account service key is invalid. Please try again after LYNE updates.";
+      }
+      if (message.includes("email not confirmed")) {
+        return "Please confirm your email address before signing in.";
+      }
+      if (message.includes("user already registered")) {
+        return "This email is already in use.";
+      }
+      if (message.includes("password should be at least")) {
+        return "Password must be at least 8 characters.";
+      }
+      if (message.includes("failed to fetch") || message.includes("network") || message.includes("load failed")) {
+        return "Could not connect to LYNE accounts. Check your connection and try again.";
+      }
+      return error.message;
+    }
+    return "Could not connect to LYNE accounts. Please try again.";
+  }
   if (error.code === "INVALID_CREDENTIALS")
     return "Email or password is incorrect.";
   if (error.code === "EMAIL_ALREADY_USED")
