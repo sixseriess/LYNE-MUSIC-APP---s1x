@@ -37,16 +37,11 @@ function addCors(response, origin) {
     headers.set(key, value);
   }
 
-  // Cookies set by the upstream API must belong to this proxy host so the
-  // browser can return them to the Worker on later requests.
   const cookies = response.headers.getSetCookie?.() ?? [];
   if (cookies.length) {
     headers.delete("Set-Cookie");
     for (const cookie of cookies) {
-      headers.append(
-        "Set-Cookie",
-        cookie.replace(/;\\s*Domain=[^;]+/i, ""),
-      );
+      headers.append("Set-Cookie", cookie.replace(/;\\s*Domain=[^;]+/i, ""));
     }
   }
 
@@ -89,10 +84,7 @@ export default {
         return json({ error: "Header not allowed", headers: denied }, 403, origin);
       }
 
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders(origin),
-      });
+      return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
     if (request.method === "TRACE" || request.method === "CONNECT") {
@@ -104,16 +96,16 @@ export default {
       return json({ status: "ok", service: "lyne-mobile-proxy" }, 200, origin);
     }
 
-    const upstreamUrl = new URL(
-      incomingUrl.pathname + incomingUrl.search,
-      UPSTREAM,
-    );
+    const upstreamUrl = new URL(incomingUrl.pathname + incomingUrl.search, UPSTREAM);
     const headers = new Headers(request.headers);
     headers.delete("Host");
     headers.delete("cf-connecting-ip");
     headers.delete("cf-ipcountry");
     headers.delete("x-forwarded-for");
-    headers.set("Origin", origin);
+
+    // The upstream API sees its own trusted origin. Browser CORS remains
+    // restricted to the GitHub Pages origin in the response headers above.
+    headers.set("Origin", new URL(UPSTREAM).origin);
 
     const upstreamRequest = new Request(upstreamUrl, {
       method: request.method,
