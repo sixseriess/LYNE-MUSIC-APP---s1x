@@ -201,8 +201,7 @@ body.mobile-pwa .app-shell-enter [data-no-window-drag] {
 }
 
 body.mobile-pwa input,
-body.mobile-pwa textarea,
-body.mobile-pwa button {
+body.mobile-pwa textarea {
   font-size: max(16px, 1em);
 }
 
