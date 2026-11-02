@@ -1,3 +1,4 @@
+# Re-trigger Pages deployment after enabling GitHub Pages in repository settings.
 name: Deploy LYNE Mobile PWA
 
 on:
