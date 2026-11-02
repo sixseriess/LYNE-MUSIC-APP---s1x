@@ -320,3 +320,24 @@ body.mobile-pwa main:not(.app-shell-enter) > section > div > p {
   body.mobile-pwa main:not(.app-shell-enter) > section > aside { padding-top: 12px !important; padding-bottom: 8px !important; }
   body.mobile-pwa main:not(.app-shell-enter) > section > div { padding-top: 8px !important; padding-bottom: 14px !important; }
 }
+
+
+/* iOS Safari stability: avoid the oversized desktop login artwork and GPU
+   blur layers on the mobile sign-in screen. */
+body.mobile-pwa main:not(.app-shell-enter) > div:first-child {
+  display: none !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) [data-window-controls],
+body.mobile-pwa main:not(.app-shell-enter) [data-window-controls] * {
+  display: none !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section,
+body.mobile-pwa main:not(.app-shell-enter) > section > aside {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section img {
+  content-visibility: auto;
+}
