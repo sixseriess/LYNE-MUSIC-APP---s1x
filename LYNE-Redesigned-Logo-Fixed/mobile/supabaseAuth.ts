@@ -117,3 +117,9 @@ export async function mobileLogout(): Promise<void> {
   if (error) throw error;
   syncMobileSession(null);
 }
+
+if (mobileSupabase) {
+  mobileSupabase.auth.onAuthStateChange((_event, session) => {
+    syncMobileSession(session);
+  });
+}
