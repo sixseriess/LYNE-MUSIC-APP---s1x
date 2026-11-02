@@ -1,10 +1,10 @@
 {
-  "id": "/mobile/",
+  "id": "./",
   "name": "LYNE Music",
   "short_name": "LYNE",
   "description": "Your music, wherever you go.",
-  "start_url": "/mobile/",
-  "scope": "/mobile/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
@@ -12,7 +12,7 @@
   "theme_color": "#08090a",
   "icons": [
     {
-      "src": "/mobile/lyne-icon.svg",
+      "src": "./lyne-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
