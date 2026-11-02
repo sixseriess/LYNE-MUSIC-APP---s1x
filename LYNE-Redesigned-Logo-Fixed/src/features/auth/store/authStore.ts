@@ -12,6 +12,14 @@ import {
 import { playerEngine } from "@/features/player";
 import { queryCache } from "@/shared/cache/queryCache";
 import { clearScreenCache } from "@/shared/cache/screenCache";
+import {
+  mobileSupabaseEnabled,
+  getMobileSession,
+  mobileLogin,
+  mobileRegister,
+  mobileUpdateProfile,
+  mobileLogout,
+} from "@/mobile/supabaseAuth";
 
 export type AuthStatus = "initializing" | "authenticated" | "anonymous";
 export type AuthState = {
@@ -33,6 +41,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   status: "initializing",
   user: null,
   initialize: async () => {
+    if (mobileSupabaseEnabled) {
+      try {
+        const session = await getMobileSession();
+        set({ status: session ? "authenticated" : "anonymous", user: session ? (getAuthSession()?.user ?? null) : null });
+      } catch (error) {
+        console.error("[LYNE Mobile] Supabase session restore failed:", error);
+        set({ status: "anonymous", user: null });
+      }
+      return;
+    }
     const stored = getAuthSession();
     if (!stored) {
       set({ status: "anonymous", user: null });
@@ -102,6 +120,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   login: async (email, password) => {
+    if (mobileSupabaseEnabled) {
+      const user = await mobileLogin(email, password);
+      set({ status: "authenticated", user });
+      if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
+      return;
+    }
     const result = await api.login(email, password);
     set({ status: "authenticated", user: result.user });
     if (typeof window !== "undefined") {
@@ -109,6 +133,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   register: async (email, password, username, displayName) => {
+    if (mobileSupabaseEnabled) {
+      const user = await mobileRegister(email, password, username, displayName);
+      set({ status: "authenticated", user });
+      if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
+      return;
+    }
     const result = await api.register(email, password, username, displayName);
     set({ status: "authenticated", user: result.user });
     if (typeof window !== "undefined") {
@@ -116,6 +146,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   updateProfile: async (patch) => {
+    if (mobileSupabaseEnabled) {
+      const updated = await mobileUpdateProfile(patch);
+      set((prev) => ({ user: prev.user ? { ...prev.user, ...updated } : updated }));
+      return updated;
+    }
     const updated = await api.updateProfile(patch);
     const current = getAuthSession();
     if (current) {
@@ -138,7 +173,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     ) {
       window.location.hash = "#/";
     }
-    await clearAuthSession();
+    if (mobileSupabaseEnabled) await mobileLogout();
+    else await clearAuthSession();
     queryCache.clear();
     clearScreenCache();
     set({ status: "anonymous", user: null });
