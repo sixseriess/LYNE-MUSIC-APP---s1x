@@ -45,7 +45,7 @@ jobs:
           VITE_MOBILE_BASE: /LYNE-MUSIC-APP---s1x/mobile/
           VITE_API_URL: https://lyne-mobile-api.nealeadam10.workers.dev
           VITE_MOBILE_SUPABASE_URL: https://gvvlajfslvjlyctzjuol.supabase.co
-          VITE_MOBILE_SUPABASE_KEY: sb_publishable_F5p3LY--RSZ3hUhzT-WNYQ_AUL1Uxrq
+          VITE_MOBILE_SUPABASE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2dmxhamZzbHZqbHljdHpqdW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0NTA2NjEsImV4cCI6MjEwOTAyNjY2MX0.C18CXbPolq9U0BG823NFdd9Rtjb7J98dprrv2skhaS4
       - name: Stage site under /mobile/
         run: |
           mkdir -p dist-pages/mobile
