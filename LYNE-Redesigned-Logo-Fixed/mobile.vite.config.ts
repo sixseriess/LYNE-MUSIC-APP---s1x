@@ -11,7 +11,7 @@ export default defineConfig({
   root: mobileRoot,
   base: process.env.VITE_MOBILE_BASE || "/mobile/",
   publicDir: path.resolve(mobileRoot, "public"),
-  plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin()],
+  plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin({ allowAuthFrame: true })],
   resolve: {
     alias: {
       "@": path.resolve(projectRoot, "./src"),
