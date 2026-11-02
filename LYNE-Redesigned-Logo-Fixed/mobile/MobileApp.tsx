@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import React from "react";
 import { HashRouter } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
@@ -7,8 +7,6 @@ import { I18nProvider } from "@/languages";
 import MobileAuthGate from "./MobileAuthGate";
 import MobileInstallPrompt from "./MobileInstallPrompt";
 import "./mobile.css";
-
-const AppRoutes = lazy(() => import("@/app/routes").then((module) => ({ default: module.AppRoutes })));
 
 export default function MobileApp() {
   useEffect(() => {
@@ -27,11 +25,7 @@ export default function MobileApp() {
         <I18nProvider>
           <ToastProvider>
             <RootErrorBoundary>
-              <MobileAuthGate>
-                <Suspense fallback={<div className="mobile-startup"><strong>LYNE</strong><p>Loading your music...</p></div>}>
-                  <AppRoutes />
-                </Suspense>
-              </MobileAuthGate>
+              <MobileAuthGate />
             </RootErrorBoundary>
           </ToastProvider>
         </I18nProvider>
