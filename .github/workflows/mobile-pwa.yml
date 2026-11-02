@@ -1,0 +1,42 @@
+name: Build LYNE Mobile PWA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "LYNE-Redesigned-Logo-Fixed/**"
+      - ".github/workflows/mobile-pwa.yml"
+  push:
+    branches: [mobile-pwa]
+    paths:
+      - "LYNE-Redesigned-Logo-Fixed/**"
+      - ".github/workflows/mobile-pwa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: LYNE-Redesigned-Logo-Fixed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: LYNE-Redesigned-Logo-Fixed/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm mobile:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LYNE-Mobile-PWA
+          path: LYNE-Redesigned-Logo-Fixed/dist-mobile/
+          if-no-files-found: error
+          retention-days: 14
