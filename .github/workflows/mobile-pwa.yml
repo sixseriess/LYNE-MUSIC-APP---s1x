@@ -32,7 +32,7 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: LYNE-Redesigned-Logo-Fixed/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm mobile:build
       - uses: actions/upload-artifact@v4
         with:
