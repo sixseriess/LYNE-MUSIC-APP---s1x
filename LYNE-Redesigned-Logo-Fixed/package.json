@@ -28,7 +28,9 @@
     "electron:build:win": "pnpm generate:brand-assets && pnpm native:build && tsc -b && vite build && electron-builder --win --publish never",
     "electron:build:mac": "pnpm generate:brand-assets && tsc -b && vite build && electron-builder --mac",
     "native:build": "node scripts/build-native-addon.cjs",
-    "generate:brand-assets": "node scripts/generate-brand-assets.mjs"
+    "generate:brand-assets": "node scripts/generate-brand-assets.mjs",
+    "mobile:dev": "vite --config mobile.vite.config.ts",
+    "mobile:build": "vite build --config mobile.vite.config.ts"
   },
   "build": {
     "appId": "com.lyne.music",
@@ -132,6 +134,7 @@
     "framer-motion": "^12.38.0",
     "googlevideo": "5.0.1",
     "gsap": "^3.15.0",
+    "hash-wasm": "4.12.0",
     "lottie-web": "^5.13.0",
     "meriyah": "7.4.0",
     "morphicons": "^1.7.1",
@@ -148,7 +151,8 @@
     "tar": "^7.5.22",
     "uqr": "0.1.3",
     "youtubei.js": "18.3.0",
-    "zustand": "^5.0.16"
+    "zustand": "^5.0.16",
+    "@supabase/supabase-js": "^2.57.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
