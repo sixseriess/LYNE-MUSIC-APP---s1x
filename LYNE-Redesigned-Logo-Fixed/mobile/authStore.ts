@@ -187,25 +187,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 }));
 
-const PLAYBACK_CLEAR_TIMEOUT_MS = 3_000;
-
-async function clearPlayback(): Promise<void> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<void>((resolve) => {
-    timer = setTimeout(resolve, PLAYBACK_CLEAR_TIMEOUT_MS);
-  });
-  try {
-    await Promise.race([playerEngine.stopAndClear().catch(() => {}), timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-useAuthStore.subscribe((state, previous) => {
-  if (state.status === "anonymous" && previous.status !== "anonymous") {
-  }
-});
-
 export function getAuthErrorCode(error: unknown): string {
   if (error instanceof HumanCheckCancelledError) return "human_check_cancelled";
   if (!(error instanceof ApiError)) {
