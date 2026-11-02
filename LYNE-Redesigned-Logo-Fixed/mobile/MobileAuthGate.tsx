@@ -1,8 +1,10 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { getAuthSession } from "@/shared/api";
 
+const LoginPage = lazy(() => import("@/features/auth/ui/LoginPage"));
+const AppRoutes = lazy(() => import("@/app/routes").then((module) => ({ default: module.AppRoutes })));
 const AppFrame = lazy(() => import("@/features/navigation/ui/AppFrame"));
 
 function StartupScreen({ message, timedOut, onReload }: { message: string; timedOut?: boolean; onReload?: () => void }) {
@@ -16,7 +18,7 @@ function StartupScreen({ message, timedOut, onReload }: { message: string; timed
   );
 }
 
-export default function MobileAuthGate({ children }: { children: ReactNode }) {
+export default function MobileAuthGate() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const status = useAuthStore((state) => state.status);
@@ -53,11 +55,13 @@ export default function MobileAuthGate({ children }: { children: ReactNode }) {
     return <StartupScreen message="Opening LYNE..." />;
   }
 
-  if (pathname === "/login") return <>{children}</>;
+  if (status === "anonymous") {
+    return <Suspense fallback={<StartupScreen message="Opening sign in..." />}><LoginPage /></Suspense>;
+  }
 
   return (
     <Suspense fallback={<StartupScreen message="Opening your music..." />}>
-      <AppFrame>{children}</AppFrame>
+      <AppFrame><AppRoutes /></AppFrame>
     </Suspense>
   );
 }
