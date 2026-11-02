@@ -10,15 +10,9 @@ import {
 import { I18nProvider } from "@/languages";
 import { AuthLock } from "@/features/auth";
 import { AppRoutes } from "@/app/routes";
-import { initMainWindowServices } from "@/app/mainWindowServices";
 import MobileInstallPrompt from "./MobileInstallPrompt";
 import "./mobile.css";
 
-let servicesInitialized = false;
-if (!servicesInitialized) {
-  servicesInitialized = true;
-  initMainWindowServices();
-}
 
 export default function MobileApp() {
   useEffect(() => {
