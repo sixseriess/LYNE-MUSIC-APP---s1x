@@ -8,7 +8,6 @@ import {
   ToastProvider,
 } from "@/shared/ui";
 import { I18nProvider } from "@/languages";
-import { CoverSwRegistrar } from "@/features/covers";
 import { AuthLock } from "@/features/auth";
 import { AppRoutes } from "@/app/routes";
 import { initMainWindowServices } from "@/app/mainWindowServices";
@@ -33,7 +32,6 @@ export default function MobileApp() {
 
   return (
     <HashRouter>
-      <CoverSwRegistrar />
       <ThemeProvider
         attribute="data-theme"
         defaultTheme="dark"
