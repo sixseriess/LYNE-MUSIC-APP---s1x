@@ -1,14 +1,11 @@
 import { create } from "zustand";
-import { api, ApiError, HumanCheckCancelledError } from "@/shared/api";
 import {
   clearAuthSession,
   getAuthSession,
   setAuthSession,
   refreshAuthSession,
-  type AuthUser,
-  type PublicUser,
-  type UpdateProfileInput,
-} from "@/shared/api";
+} from "@/shared/api/auth-session";
+import type { AuthUser, PublicUser, UpdateProfileInput } from "@/shared/contracts";
 import { queryCache } from "@/shared/cache/queryCache";
 import { clearScreenCache } from "@/shared/cache/screenCache";
 import {
@@ -65,6 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ status: "authenticated", user: stored.user });
     }
     try {
+      const { api } = await import("@/shared/api/api");
       const getMePromise = api.getMe();
       const timeoutPromise = new Promise<null>((_, reject) =>
         setTimeout(() => reject(new Error("Auth initialize timeout")), 6000),
@@ -78,7 +76,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
     } catch (err) {
       if (
-        err instanceof ApiError &&
+        isApiError(err) &&
         (err.status === 401 || err.status === 403)
       ) {
         // Attempt refresh before clearing session in case access token expired between sessions
@@ -87,6 +85,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           try {
             const refreshed = await refreshAuthSession();
             if (refreshed) {
+              const { api } = await import("@/shared/api/api");
               const retryUser = await api.getMe().catch(() => null);
               const active = getAuthSession();
               if (active)
@@ -130,6 +129,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
       return;
     }
+    const { api } = await import("@/shared/api/api");
     const result = await api.login(email, password);
     set({ status: "authenticated", user: result.user });
     if (typeof window !== "undefined") {
@@ -143,6 +143,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
       return;
     }
+    const { api } = await import("@/shared/api/api");
     const result = await api.register(email, password, username, displayName);
     set({ status: "authenticated", user: result.user });
     if (typeof window !== "undefined") {
@@ -155,6 +156,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set((prev) => ({ user: prev.user ? { ...prev.user, ...updated } : updated }));
       return updated;
     }
+    const { api } = await import("@/shared/api/api");
     const updated = await api.updateProfile(patch);
     const current = getAuthSession();
     if (current) {
@@ -187,9 +189,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 }));
 
+function isApiError(error: unknown): error is { status: number; code?: string } {
+  return typeof error === "object" && error !== null && "status" in error;
+}
+
 export function getAuthErrorCode(error: unknown): string {
-  if (error instanceof HumanCheckCancelledError) return "human_check_cancelled";
-  if (!(error instanceof ApiError)) {
+  if (error instanceof Error && error.name === "HumanCheckCancelledError") return "human_check_cancelled";
+  if (!isApiError(error)) {
     const status = typeof error === "object" && error !== null && "status" in error
       ? Number((error as { status?: unknown }).status)
       : 0;
@@ -210,7 +216,7 @@ export function getAuthErrorCode(error: unknown): string {
 }
 
 export function authErrorMessage(error: unknown): string {
-  if (!(error instanceof ApiError)) {
+  if (!isApiError(error)) {
     if (error instanceof Error && error.message) {
       const message = error.message.toLowerCase();
       if (message.includes("invalid api key") || message.includes("invalid jwt")) {
