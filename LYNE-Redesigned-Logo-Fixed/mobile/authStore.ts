@@ -1,9 +1,7 @@
 import { create } from "zustand";
 import {
-  clearAuthSession,
   getAuthSession,
   setAuthSession,
-  refreshAuthSession,
 } from "@/shared/api/auth-session";
 import type { AuthUser, PublicUser, UpdateProfileInput } from "@/shared/contracts";
 import { queryCache } from "@/shared/cache/queryCache";
@@ -52,75 +50,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
       return;
     }
-    const stored = getAuthSession();
-    if (!stored) {
-      set({ status: "anonymous", user: null });
-      return;
-    }
-    // Optimistically authenticate if stored user is present
-    if (stored.user) {
-      set({ status: "authenticated", user: stored.user });
-    }
-    try {
-      const { api } = await import("@/shared/api/api");
-      const getMePromise = api.getMe();
-      const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => reject(new Error("Auth initialize timeout")), 6000),
-      );
-      const user = await Promise.race([getMePromise, timeoutPromise]);
-      const current = getAuthSession();
-      if (current) setAuthSession({ ...current, user: user ?? current.user });
-      set({
-        status: "authenticated",
-        user: user ?? current?.user ?? stored.user,
-      });
-    } catch (err) {
-      if (
-        isApiError(err) &&
-        (err.status === 401 || err.status === 403)
-      ) {
-        // Attempt refresh before clearing session in case access token expired between sessions
-        const current = getAuthSession();
-        if (current?.refreshToken) {
-          try {
-            const refreshed = await refreshAuthSession();
-            if (refreshed) {
-              const { api } = await import("@/shared/api/api");
-              const retryUser = await api.getMe().catch(() => null);
-              const active = getAuthSession();
-              if (active)
-                setAuthSession({ ...active, user: retryUser ?? active.user });
-              set({
-                status: "authenticated",
-                user:
-                  retryUser ?? refreshed.user ?? current.user ?? stored.user,
-              });
-              return;
-            }
-          } catch {
-            // refresh failed
-          }
-        }
-        // refreshAuthSession already drops the session when the server rejects the refresh token (401/403).
-        // still here = the refresh failed for a transient reason (network, 5xx), so keep the user signed in.
-        // shortcut: a server answering 400/422 for a dead refresh token keeps a broken session, use logout then
-        const remaining = getAuthSession();
-        if (remaining?.refreshToken) {
-          set({ status: "authenticated", user: remaining.user ?? stored.user });
-          return;
-        }
-        setAuthSession(null);
-        set({ status: "anonymous", user: null });
-      } else {
-        // If it's a network error, timeout, or transient 5xx, preserve authenticated state if we have a stored session
-        if (stored.user || stored.accessToken) {
-          set({ status: "authenticated", user: stored.user });
-        } else {
-          setAuthSession(null);
-          set({ status: "anonymous", user: null });
-        }
-      }
-    }
+    set({ status: "anonymous", user: null });
+
   },
   login: async (email, password) => {
     if (mobileSupabaseEnabled) {
@@ -129,12 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
       return;
     }
-    const { api } = await import("@/shared/api/api");
-    const result = await api.login(email, password);
-    set({ status: "authenticated", user: result.user });
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("library:changed"));
-    }
+    throw new Error("Mobile account service is not configured. Please try again after LYNE updates.");
   },
   register: async (email, password, username, displayName) => {
     if (mobileSupabaseEnabled) {
@@ -143,12 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (typeof window !== "undefined") window.dispatchEvent(new Event("library:changed"));
       return;
     }
-    const { api } = await import("@/shared/api/api");
-    const result = await api.register(email, password, username, displayName);
-    set({ status: "authenticated", user: result.user });
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("library:changed"));
-    }
+    throw new Error("Mobile account service is not configured. Please try again after LYNE updates.");
   },
   updateProfile: async (patch) => {
     if (mobileSupabaseEnabled) {
@@ -156,16 +77,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set((prev) => ({ user: prev.user ? { ...prev.user, ...updated } : updated }));
       return updated;
     }
-    const { api } = await import("@/shared/api/api");
-    const updated = await api.updateProfile(patch);
-    const current = getAuthSession();
-    if (current) {
-      setAuthSession({ ...current, user: { ...current.user, ...updated } });
-    }
-    set((prev) => ({
-      user: prev.user ? { ...prev.user, ...updated } : updated,
-    }));
-    return updated;
+    throw new Error("Mobile account service is not configured. Please try again after LYNE updates.");
   },
   logout: async () => {
     try {
@@ -179,7 +91,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       window.location.hash = "#/";
     }
     if (mobileSupabaseEnabled) await mobileLogout();
-    else await clearAuthSession();
+    else setAuthSession(null);
     queryCache.clear();
     clearScreenCache();
     set({ status: "anonymous", user: null });
