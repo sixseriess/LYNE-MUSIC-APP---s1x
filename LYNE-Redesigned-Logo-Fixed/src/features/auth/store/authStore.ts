@@ -19,7 +19,7 @@ import {
   mobileRegister,
   mobileUpdateProfile,
   mobileLogout,
-} from "@/mobile/supabaseAuth";
+} from "../../../../mobile/supabaseAuth";
 
 export type AuthStatus = "initializing" | "authenticated" | "anonymous";
 export type AuthState = {
