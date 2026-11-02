@@ -1,6 +1,6 @@
 import { createClient, type Session, type User } from "@supabase/supabase-js";
-import type { AuthTokens, PublicUser, UpdateProfileInput } from "@/shared/api";
-import { setAuthSession } from "@/shared/api";
+import type { AuthTokens, PublicUser, UpdateProfileInput } from "@/shared/contracts";
+import { setAuthSession } from "@/shared/api/auth-session";
 
 const url = import.meta.env.VITE_MOBILE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_MOBILE_SUPABASE_KEY as string | undefined;
