@@ -14,6 +14,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), contentSecurityPolicyPlugin({ allowAuthFrame: true })],
   resolve: {
     alias: {
+      "@/features/auth/store/authStore": path.resolve(mobileRoot, "./authStore.ts"),
       "@": path.resolve(projectRoot, "./src"),
       "next/navigation": path.resolve(projectRoot, "./src/lib/navigation.tsx"),
       "next/link": path.resolve(projectRoot, "./src/lib/navigation.tsx"),
