@@ -247,3 +247,76 @@ body.mobile-pwa .lyne-install-banner {
 @media (min-width: 700px) {
   body.mobile-pwa .app-shell-enter { max-width: 680px !important; margin: 0 auto !important; }
 }
+
+
+/* Compact mobile auth screen: keep the Windows visual language without
+   forcing its two-column desktop card onto a phone. */
+body.mobile-pwa main:not(.app-shell-enter) {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: max(18px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)) !important;
+  overflow-y: auto !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  max-height: none !important;
+  margin: auto !important;
+  gap: 0 !important;
+  overflow: visible !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 17px 20px 13px !important;
+  border-radius: 19px 19px 0 0 !important;
+  background: transparent !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside > img:first-of-type {
+  width: 82px !important;
+  height: 30px !important;
+  object-position: left center !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside > div:last-child {
+  margin-top: 8px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside h1 {
+  font-size: 22px !important;
+  line-height: 1.15 !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside p {
+  margin-top: 5px !important;
+  font-size: 12px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > aside > div:last-child > div {
+  display: none !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > div {
+  padding: 12px 20px 20px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > div > div:first-child {
+  padding-bottom: 12px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section form {
+  margin-top: 14px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section label {
+  margin-top: 11px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section input {
+  min-height: 44px !important;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section button {
+  min-height: 42px;
+}
+body.mobile-pwa main:not(.app-shell-enter) > section > div > p {
+  margin-top: 6px !important;
+}
+@media (max-height: 720px) {
+  body.mobile-pwa main:not(.app-shell-enter) > section > aside { padding-top: 12px !important; padding-bottom: 8px !important; }
+  body.mobile-pwa main:not(.app-shell-enter) > section > div { padding-top: 8px !important; padding-bottom: 14px !important; }
+}
