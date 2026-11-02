@@ -6,6 +6,17 @@ export {
   resolveApiErrorMessage,
 } from "./api";
 export { DEFAULT_PRIMARY_API, getApiBaseUrl } from "./baseUrl";
+export {
+  setHumanCheckPrompt,
+  humanCheckOrigin,
+  humanCheckPageUrl,
+  isHumanCheckMode,
+  runHumanCheck,
+  HumanCheckCancelledError,
+  type HumanCheckAction,
+  type HumanCheckMode,
+  type HumanCheckRequest,
+} from "./humanCheck";
 export type {
   SearchType,
   ApiCover,
