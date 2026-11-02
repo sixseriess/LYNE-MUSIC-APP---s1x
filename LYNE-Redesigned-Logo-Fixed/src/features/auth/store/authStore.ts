@@ -43,7 +43,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     if (mobileSupabaseEnabled) {
       try {
-        const session = await getMobileSession();
+        const session = await Promise.race([
+          getMobileSession(),
+          new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error("Mobile session restore timed out")), 5000),
+          ),
+        ]);
         set({ status: session ? "authenticated" : "anonymous", user: session ? (getAuthSession()?.user ?? null) : null });
       } catch (error) {
         console.error("[LYNE Mobile] Supabase session restore failed:", error);
