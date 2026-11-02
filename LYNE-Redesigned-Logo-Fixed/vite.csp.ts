@@ -1,6 +1,6 @@
 import type { Plugin } from "vite";
 
-function contentSecurityPolicy(isDev: boolean): string {
+function contentSecurityPolicy(isDev: boolean, allowAuthFrame = false): string {
   const scriptSources = [
     "'self'",
     "'unsafe-eval'",
@@ -15,6 +15,7 @@ function contentSecurityPolicy(isDev: boolean): string {
     "img-src 'self' * http: https: data: blob: liner-local:",
     "media-src 'self' * http: https: data: blob: liner-local:",
     "connect-src 'self' * http: https: ws: wss: data: blob:",
+    ...(allowAuthFrame ? ["frame-src 'self' https://api.tryliner.fun"] : []),
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
@@ -22,7 +23,9 @@ function contentSecurityPolicy(isDev: boolean): string {
   ].join("; ");
 }
 
-export function contentSecurityPolicyPlugin(): Plugin {
+export function contentSecurityPolicyPlugin(
+  options: { allowAuthFrame?: boolean } = {},
+): Plugin {
   let isDev = false;
   return {
     name: "liner-content-security-policy",
@@ -35,7 +38,7 @@ export function contentSecurityPolicyPlugin(): Plugin {
           tag: "meta",
           attrs: {
             "http-equiv": "Content-Security-Policy",
-            content: contentSecurityPolicy(isDev),
+            content: contentSecurityPolicy(isDev, options.allowAuthFrame === true),
           },
           injectTo: "head-prepend",
         },
