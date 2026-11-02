@@ -1,18 +1,14 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import React from "react";
 import { HashRouter } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import {
-  AppleEmojiProvider,
-  GlobalTooltip,
-  RootErrorBoundary,
-  ToastProvider,
-} from "@/shared/ui";
+import { GlobalTooltip, RootErrorBoundary, ToastProvider } from "@/shared/ui";
 import { I18nProvider } from "@/languages";
-import { AuthLock } from "@/features/auth";
-import { AppRoutes } from "@/app/routes";
+import MobileAuthGate from "./MobileAuthGate";
 import MobileInstallPrompt from "./MobileInstallPrompt";
 import "./mobile.css";
 
+const AppRoutes = lazy(() => import("@/app/routes").then((module) => ({ default: module.AppRoutes })));
 
 export default function MobileApp() {
   useEffect(() => {
@@ -26,24 +22,19 @@ export default function MobileApp() {
 
   return (
     <HashRouter>
-      <ThemeProvider
-        attribute="data-theme"
-        defaultTheme="dark"
-        enableSystem={false}
-        disableTransitionOnChange
-      >
+      <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         <GlobalTooltip />
-        <AppleEmojiProvider>
-          <I18nProvider>
-            <ToastProvider>
-              <RootErrorBoundary>
-                <AuthLock>
+        <I18nProvider>
+          <ToastProvider>
+            <RootErrorBoundary>
+              <MobileAuthGate>
+                <Suspense fallback={<div className="mobile-startup"><strong>LYNE</strong><p>Loading your music...</p></div>}>
                   <AppRoutes />
-                </AuthLock>
-              </RootErrorBoundary>
-            </ToastProvider>
-          </I18nProvider>
-        </AppleEmojiProvider>
+                </Suspense>
+              </MobileAuthGate>
+            </RootErrorBoundary>
+          </ToastProvider>
+        </I18nProvider>
         <MobileInstallPrompt />
       </ThemeProvider>
     </HashRouter>
