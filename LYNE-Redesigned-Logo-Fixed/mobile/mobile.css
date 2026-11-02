@@ -392,3 +392,101 @@ body.mobile-pwa .mobile-startup button {
 @media (prefers-reduced-motion: reduce) {
   body.mobile-pwa .mobile-startup-spinner { animation: none; }
 }
+
+
+/* Mobile-first LYNE shell polish. Scoped to the PWA so desktop layout is untouched. */
+@media (max-width: 699px) {
+  body.mobile-pwa .app-shell-enter {
+    --mobile-nav-height: calc(66px + env(safe-area-inset-bottom));
+    --mobile-player-height: 66px;
+    isolation: isolate;
+  }
+
+  body.mobile-pwa .app-shell-enter > .absolute.inset-x-1\.5 {
+    top: env(safe-area-inset-top) !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 0 14px !important;
+    z-index: 46 !important;
+  }
+
+  body.mobile-pwa .app-shell-enter header {
+    height: 54px !important;
+    background: linear-gradient(180deg, rgba(8,9,10,.96), rgba(8,9,10,.72)) !important;
+  }
+
+  body.mobile-pwa .app-shell-enter header > div:first-child {
+    width: 58px !important;
+    justify-content: flex-start !important;
+  }
+
+  body.mobile-pwa .app-shell-enter header img {
+    width: 66px !important;
+    height: 30px !important;
+    object-position: left center !important;
+  }
+
+  body.mobile-pwa .app-shell-enter > .flex-1 > aside {
+    height: var(--mobile-nav-height) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+
+  body.mobile-pwa .app-shell-enter > .flex-1 > aside > div {
+    height: 66px !important;
+    padding-bottom: 0 !important;
+  }
+
+  body.mobile-pwa .app-shell-enter > .flex-1 > div {
+    padding-bottom: calc(var(--mobile-nav-height) + var(--mobile-player-height)) !important;
+  }
+
+  body.mobile-pwa .app-shell-enter main {
+    --page-inset-top: calc(58px + env(safe-area-inset-top)) !important;
+    --page-inset-bottom: calc(var(--mobile-nav-height) + var(--mobile-player-height)) !important;
+    --floating-inset-bottom: calc(var(--mobile-nav-height) + var(--mobile-player-height) + 8px) !important;
+  }
+
+  body.mobile-pwa .app-shell-enter main > div {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  body.mobile-pwa .app-shell-enter main img {
+    max-width: 100%;
+  }
+
+  body.mobile-pwa .app-shell-enter button,
+  body.mobile-pwa .app-shell-enter a,
+  body.mobile-pwa [role="button"] {
+    touch-action: manipulation;
+  }
+
+  body.mobile-pwa .app-shell-enter input,
+  body.mobile-pwa .app-shell-enter textarea,
+  body.mobile-pwa .app-shell-enter select {
+    min-height: 44px;
+  }
+
+  body.mobile-pwa .app-shell-enter [data-dialog-container] {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Keep the native safe-area clear of the fixed mini-player and tab bar. */
+body.mobile-pwa .app-shell-enter > .flex-1 > div > div[class*="z-\\[55\\]"] {
+  position: relative;
+  margin-bottom: calc(4px + env(safe-area-inset-bottom));
+}
+
+body.mobile-pwa .app-shell-enter > .flex-1 > aside nav a[aria-current="page"],
+body.mobile-pwa .app-shell-enter > .flex-1 > aside nav a.active {
+  color: var(--color-accent, #c8f56a) !important;
+}
+
+body.mobile-pwa .app-shell-enter > .flex-1 > aside nav a[aria-current="page"]::after,
+body.mobile-pwa .app-shell-enter > .flex-1 > aside nav a.active::after {
+  color: var(--color-accent, #c8f56a) !important;
+}
