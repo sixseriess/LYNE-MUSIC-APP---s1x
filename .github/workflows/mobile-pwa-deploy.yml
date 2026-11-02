@@ -44,6 +44,8 @@ jobs:
         env:
           VITE_MOBILE_BASE: /LYNE-MUSIC-APP---s1x/mobile/
           VITE_API_URL: https://lyne-mobile-api.nealeadam10.workers.dev
+          VITE_MOBILE_SUPABASE_URL: https://gvvlajfslvjlyctzjuol.supabase.co
+          VITE_MOBILE_SUPABASE_KEY: sb_publishable_F5p3LY--RSZ3hUhzT-WNYQ_AUL1Uxrq
       - name: Stage site under /mobile/
         run: |
           mkdir -p dist-pages/mobile
