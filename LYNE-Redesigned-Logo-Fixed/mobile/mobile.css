@@ -341,3 +341,54 @@ body.mobile-pwa main:not(.app-shell-enter) > section > aside {
 body.mobile-pwa main:not(.app-shell-enter) > section img {
   content-visibility: auto;
 }
+
+
+/* Mobile-only startup surfaces */
+body.mobile-pwa .mobile-startup {
+  display: flex;
+  min-height: 100dvh;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: max(24px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom));
+  background: #08090a;
+  color: #fff;
+  text-align: center;
+}
+body.mobile-pwa .mobile-startup-mark {
+  color: #c8f56a;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: .22em;
+}
+body.mobile-pwa .mobile-startup-spinner {
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(255,255,255,.14);
+  border-top-color: #c8f56a;
+  border-radius: 50%;
+  animation: mobile-lyne-spin .8s linear infinite;
+}
+body.mobile-pwa .mobile-startup p {
+  margin: 0;
+  color: rgba(255,255,255,.56);
+  font-size: 13px;
+  line-height: 1.45;
+}
+body.mobile-pwa .mobile-startup button {
+  min-height: 44px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: #c8f56a;
+  color: #10110e;
+  font-size: 13px;
+  font-weight: 700;
+}
+@keyframes mobile-lyne-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  body.mobile-pwa .mobile-startup-spinner { animation: none; }
+}
