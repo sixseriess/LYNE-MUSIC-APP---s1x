@@ -176,18 +176,27 @@ export const TrackSearchField = memo(function TrackSearchField({
   );
 });
 
-interface TrackSearchEmptyProps {
-  query?: string;
-  onClear?: () => void;
-}
-
-export const TrackSearchEmpty = memo(function TrackSearchEmpty(_props: TrackSearchEmptyProps) {
+export const TrackSearchEmpty = memo(function TrackSearchEmpty({
+  query,
+  onClear,
+}: {
+  query: string;
+  onClear: () => void;
+}) {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-[40vh] items-center justify-center text-center select-none">
-      <p className="m-0 text-[14px] font-[500] text-text-primary">
-        {t("common.no_results")}
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-[10px] text-center select-none">
+      <Search2Line size={32} className="text-text-tertiary/70" />
+      <p className="m-0 max-w-[360px] truncate text-[14px] font-[500] text-text-primary">
+        {t("track_search.no_results", { query })}
       </p>
+      <button
+        type="button"
+        onClick={onClear}
+        className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-text-tertiary transition-colors hover:text-text-primary"
+      >
+        {t("track_search.clear")}
+      </button>
     </div>
   );
 });
