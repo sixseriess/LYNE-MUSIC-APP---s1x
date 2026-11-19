@@ -503,7 +503,7 @@ export function SearchModal({
                   duration: 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className={`w-[min(660px,calc(100vw-90px))] mt-[8px] max-h-[500px] h-[500px] rounded-[8px] ${isSearchEmpty ? "bg-transparent" : "bg-bg-panel/98 backdrop-blur-2xl"} flex flex-col overflow-hidden`}
+                className="w-[min(660px,calc(100vw-90px))] mt-[8px] max-h-[500px] h-[500px] rounded-[8px] bg-bg-panel/98 backdrop-blur-2xl flex flex-col overflow-hidden"
               >
                 <div className="flex items-center gap-[6px] px-[14px] pt-[12px] pb-[6px] shrink-0 overflow-x-auto">
                   {filterKeys.map((key) => {
@@ -562,6 +562,9 @@ export function SearchModal({
                       >
                         <p className="m-0 text-[14px] text-text-primary font-medium">
                           {t("common.no_results")}
+                        </p>
+                        <p className="m-0 text-[12px] text-text-tertiary">
+                          {t("common.try_another_search")}
                         </p>
                       </motion.div>
                     ) : searchResults.length > 0 ? (
