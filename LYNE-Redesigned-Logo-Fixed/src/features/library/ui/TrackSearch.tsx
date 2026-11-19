@@ -176,7 +176,12 @@ export const TrackSearchField = memo(function TrackSearchField({
   );
 });
 
-export const TrackSearchEmpty = memo(function TrackSearchEmpty() {
+interface TrackSearchEmptyProps {
+  query?: string;
+  onClear?: () => void;
+}
+
+export const TrackSearchEmpty = memo(function TrackSearchEmpty(_props: TrackSearchEmptyProps) {
   const { t } = useTranslation();
   return (
     <div className="flex min-h-[40vh] items-center justify-center text-center select-none">
